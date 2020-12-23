@@ -179,9 +179,9 @@ enum {
     PACKET_SEND_PARTICLE_EFFECT_V2,
     PACKET_ACTIVE_ARROW_TO_ITEM,
     PACKET_SELECT_TILE_INDEX,
-    PACKET_SEND_PLAYER_TRIBUTE_DATA,
-    PACKET_SET_EXTRA_MODS,
-    PACKET_ON_STEP_ON_TILE_MOD,
+    PACKET_SEND_PLAYER_TRIBUTE_DATA, //39
+    PACKET_SET_EXTRA_MODS, //this is 45, but keeping as 40, idk if its some GT error of they are missing names for 40-454
+    PACKET_ON_STEP_ON_TILE_MOD, //46 same
     PACKET_MAXVAL //not real, just for string overflow
 };
 enum {
