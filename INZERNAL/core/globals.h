@@ -141,6 +141,8 @@ namespace opt {
 		extern bool		movespeed_start;
 		extern bool		movespeed_stop;
 		extern float	movespeed_val;
+		extern bool		punchstr_on;
+		extern float	punchstr_val;
 	}
 	
 }

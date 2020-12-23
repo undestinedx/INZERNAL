@@ -48,6 +48,9 @@ namespace opt {
 		bool	movespeed_start		=	true;		//instant acceleration/start of movement
 		bool	movespeed_stop		=	true;		//instant deceleration/stop of movement
 		float	movespeed_val		=	250.f;		//actual speed that you will have
+
+		bool	punchstr_on			=	false;		//toggle: use custom pucnh strength
+		float	punchstr_val		=	300.0f;		//value of it. negative should act like heartbow. no clue if this works
 	}
 	
 }

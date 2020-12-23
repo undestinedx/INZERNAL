@@ -9,7 +9,7 @@
 GTClass EncryptedFloat {
    private:
     float enc_first;
-    int unused; //this is never used in any single place
+    float decrypted; //this is the straight up value for other players, they dont have encrypted values
     float enc_second;
     float weight;
 
@@ -20,24 +20,20 @@ GTClass EncryptedFloat {
     //enc         has weight + the actual value 
     //gt checks both enc_first and enc_second and the weight in their anti hack checks and so on
 
-    //both give the same result, but GetValue is obviously less heavy
-    float GetValue2() {
-        return enc_first - (weight * 0.5f);
+    float get(bool local = true) {
+        return local ? (enc_second - weight) : decrypted;
     }
-    float GetValue() {
-        return enc_second - weight;
-    }
-
     //this is just smth i used for my testing to make sure everythings right, gt also uses this formula to deduce hacks
-    float GetBakery() {
+    float bakery() {
        return enc_second - ((enc_first - weight * 0.5f) + weight);
     }
-    float GetWeight() {
-        return weight;
-    }
-    void SetValue(float value) {
-        enc_second = weight + value;
-        enc_first = (weight * 0.5f) + value;
+    void set(float value, bool local = true) {
+        if (local) {
+            enc_second = weight + value;
+            enc_first = (weight * 0.5f) + value;
+        }
+        else
+        decrypted = value;
     }
 };
 #pragma pack(pop)

@@ -24,6 +24,22 @@ void menu::cheats_tab() {
             ImGui::EndChild();
         }
     }
+    if (ImGui::CollapsingHeader("Punch strength changer")) {
+        if (ImGui::BeginChild("###punchstr", AUTOSIZE(3), true)) {
+            ImGui::Checkbox("Enabled###punchstr", &opt::cheat::punchstr_on);
+            ImGui::SameLine();
+            auto local = sdk::GetGameLogic()->GetLocalPlayer();
+            if (ImGui::SliderFloat("###punchstr", &opt::cheat::punchstr_val, -500.0f, 2000.f, "%0.0f") && opt::cheat::punchstr_on) {
+            
+                if (local)
+                    local->punch_strength.set(opt::cheat::punchstr_val);
+            }
+            ImGui::Text("Not sure if this even changes your real punch strength, or what effect it has.");
+            if (local)
+                ImGui::Text("real value: %f", local->punch_strength.get());
+            ImGui::EndChild();
+        }
+    }
     if (ImGui::CollapsingHeader("Movement speed changer")) {
         if (ImGui::BeginChild("###movchanger", AUTOSIZE(3), true)) {
             ImGui::Checkbox("Enabled###movtoggle", &opt::cheat::movespeed_on);
