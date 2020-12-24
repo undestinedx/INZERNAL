@@ -14,7 +14,7 @@ class SendPacketHook {
             return;
 
         if (logging::enabled && logging::console & logging::sendpacket)
-            printf("sending text packet: %d [%s]\n", type, packet.c_str());
+            printf("[sendpacket] type: %d\n%s\n", type, packet.c_str());
 
         if (packet.find("game_version|") != -1 && opt::spoof_login) {
             auto var = RTVar::parse(packet);
@@ -34,8 +34,8 @@ class SendPacketHook {
                 var.set("zf", std::to_string(utils::random(INT_MIN, INT_MAX)));
             }
             else if (opt::spoof_win == WinSpoof::wsMimic) { //win-specific file values, mismatching is logged as fake windows.
-                var.set("fz", "7013544");                   //last update: 2.950
-                var.set("zf", "-1553185796");
+                var.set("fz", "7087272");                   //last update: 2.951
+                var.set("zf", "-1573626264");
             }
 
             if (opt::flag_mode == FlagMode::fmRandom)

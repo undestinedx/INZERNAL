@@ -29,7 +29,8 @@ class SendPacketRawHook {
             utils::printc("95", "[ping check] sending emulated response so we dont get dc or ban");
             GameUpdatePacket pk{ 0 };
             pk.type = PACKET_PING_REPLY;
-            pk.item = packet->item; // tick count (speedhack)
+            pk.ping_hash = packet->ping_hash; // HashString of ping request int data field
+            pk.int_data = packet->int_data; // tick count (speedhack)
             pk.pos_x = 64.f;        // punch range in pixels
             pk.pos_y = 64.f;        // build range in pixels
             pk.velocity_x = 1000.f; //gravity
