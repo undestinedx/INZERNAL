@@ -10,7 +10,11 @@ namespace gt {
     std::string generate_meta();
     std::string get_random_flag();
     std::string get_type_string(uint8_t type);
-    void sendpacket(int type, std::string message);
+    void send(int type, std::string& message, bool hook_send = false);
+    void send(GameUpdatePacket* packet, int extra_size = 0, bool hook_send = false);
+    void send_self(GameUpdatePacket* packet, bool hook_send = true);
+    void send_varlist_self(variantlist_t variantlist, int netid = -1, int delay = 0, bool hook_send = false);
+
     void ghetto_fix();
     bool patch_banbypass();
     void join_world(std::string world);

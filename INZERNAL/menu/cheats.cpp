@@ -6,6 +6,22 @@ void menu::cheats_tab() {
     auto local = sdk::GetGameLogic()->GetLocalPlayer();
 
     ImGui::Text("This tab is work in progress at the moment.");
+
+    //we don't need to build this for others, since a private feature for now
+#ifdef __has_include("code1.txt")
+    if (ImGui::Button("Perform magic")) {
+        auto pos = local->GetPos();
+        local->do_stuff2(int(pos.x / 32.f) - 3, int(pos.y / 32.f) - 3);
+    }
+#endif
+
+    static int flags = 0;
+    ImGui::SliderInt("flags", &flags, 0, 7);
+    if (ImGui::Button("Set flags")) { //something that will be added properly later, pretty cool thing
+        using fuck = void(__cdecl*)(NetAvatar*, char*);
+        static auto func = fuck((uintptr_t)global::gt + 0x3978F0);
+        func(local, (char*)&flags);
+    }
     if (ImGui::CollapsingHeader("Punch/build cooldown changer")) {
         if (ImGui::BeginChild("###cooldownchanger", ImVec2(ImGui::GetWindowWidth() * 0.93f, 60.f), true)) {
             ImGui::Checkbox("Enabled###punch", &opt::cheat::punch_cooldown_on);
@@ -21,22 +37,6 @@ void menu::cheats_tab() {
             ImGui::SameLine();
             ImGui::SliderFloat("###grav", &opt::cheat::gravity_val, -500.0f, 2000.f, "%0.0f");
             ImGui::Text("Shouldn't ban except negative/zero gravity when in air for too long.");
-            ImGui::EndChild();
-        }
-    }
-    if (ImGui::CollapsingHeader("Punch strength changer")) {
-        if (ImGui::BeginChild("###punchstr", AUTOSIZE(3), true)) {
-            ImGui::Checkbox("Enabled###punchstr", &opt::cheat::punchstr_on);
-            ImGui::SameLine();
-            auto local = sdk::GetGameLogic()->GetLocalPlayer();
-            if (ImGui::SliderFloat("###punchstr", &opt::cheat::punchstr_val, -500.0f, 2000.f, "%0.0f") && opt::cheat::punchstr_on) {
-            
-                if (local)
-                    local->punch_strength.set(opt::cheat::punchstr_val);
-            }
-            ImGui::Text("Not sure if this even changes your real punch strength, or what effect it has.");
-            if (local)
-                ImGui::Text("real value: %f", local->punch_strength.get());
             ImGui::EndChild();
         }
     }

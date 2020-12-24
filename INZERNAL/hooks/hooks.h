@@ -59,7 +59,7 @@ namespace hooks {
 	void	__cdecl		HandleTouch(LevelTouchComponent* touch, CL_Vec2f pos, bool started);
     void    __cdecl     WorldCamera_OnUpdate(WorldCamera* camera, CL_Vec2f unk, CL_Vec2f unk2);
     void    __cdecl     UpdateFromNetAvatar(AvatarRenderData* render_data, NetAvatar* player);
-    void    __cdecl     SendPacket(int type, const std::string& packet, ENetPeer* peer);
+    void    __cdecl     SendPacket(int type, std::string& packet, ENetPeer* peer);
     void    __cdecl     ProcessTankUpdatePacket(GameLogic* logic, GameUpdatePacket* packet);
     bool    __cdecl     CanSeeGhosts(int id);
     void    __cdecl     NetAvatar_Gravity(NetAvatar* player);

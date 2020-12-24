@@ -1,7 +1,12 @@
 #pragma once
 #include <core/gt.h>
-#include <algorithm>
+#include <hooks/SendPacket.h>
+#include <hooks/SendPacketRaw.h>
+#include <hooks/ProcessTankUpdatePacket.h>
 #include <sdk/GameUpdatePacket.h>
+#include <sdk/sdk.h>
+#include <algorithm>
+
 
 std::string gt::generate_mac(const std::string& prefix) {
     std::string x = prefix + ":";
@@ -60,15 +65,61 @@ std::string gt::get_type_string(uint8_t type) {
         "PACKET_SEND_INVENTORY_STATE", "PACKET_ITEM_ACTIVATE_REQUEST", "PACKET_ITEM_ACTIVATE_OBJECT_REQUEST", "PACKET_SEND_TILE_TREE_STATE",
         "PACKET_MODIFY_ITEM_INVENTORY", "PACKET_ITEM_CHANGE_OBJECT", "PACKET_SEND_LOCK", "PACKET_SEND_ITEM_DATABASE_DATA", "PACKET_SEND_PARTICLE_EFFECT",
         "PACKET_SET_ICON_STATE", "PACKET_ITEM_EFFECT", "PACKET_SET_CHARACTER_STATE", "PACKET_PING_REPLY", "PACKET_PING_REQUEST", "PACKET_GOT_PUNCHED",
-        "PACKET_APP_CHECK_RESPONSE", "PACKET_APP_INTEGRITY_FAIL",
-        "PACKET_DISCONNECT",
-        "PACKET_BATTLE_JOIN",
-        "PACKET_BATTLE_EVENT", "PACKET_USE_DOOR", "PACKET_SEND_PARENTAL", "PACKET_GONE_FISHIN", "PACKET_STEAM", "PACKET_PET_BATTLE", "PACKET_NPC", "PACKET_SPECIAL",
-        "PACKET_SEND_PARTICLE_EFFECT_V2", "PACKET_ACTIVE_ARROW_TO_ITEM", "PACKET_SELECT_TILE_INDEX", "PACKET_SEND_PLAYER_TRIBUTE_DATA", "PACKET_SET_EXTRA_MODS", "PACKET_ON_STEP_ON_TILE_MOD", "PACKET_ERRORTYPE" };
+        "PACKET_APP_CHECK_RESPONSE", "PACKET_APP_INTEGRITY_FAIL", "PACKET_DISCONNECT", "PACKET_BATTLE_JOIN", "PACKET_BATTLE_EVENT", "PACKET_USE_DOOR",
+        "PACKET_SEND_PARENTAL", "PACKET_GONE_FISHIN", "PACKET_STEAM", "PACKET_PET_BATTLE", "PACKET_NPC", "PACKET_SPECIAL", "PACKET_SEND_PARTICLE_EFFECT_V2",
+        "PACKET_ACTIVE_ARROW_TO_ITEM", "PACKET_SELECT_TILE_INDEX", "PACKET_SEND_PLAYER_TRIBUTE_DATA", "PACKET_SET_EXTRA_MODS", "PACKET_ON_STEP_ON_TILE_MOD",
+        "PACKET_ERRORTYPE" };
 
     if (type >= PACKET_MAXVAL)
         type = PACKET_MAXVAL - 1; //will set any unknown type as errortype and keep us from crashing
     return types[type];
+}
+
+void gt::send(int type, std::string& message, bool hook_send) {
+    static auto func = types::SendPacket(sigs::get(sig::sendpacket));
+    if (hook_send) //if we want to apply our own code or just log shit
+        SendPacketHook::Execute(func, type, message, sdk::GetPeer());
+    else
+        func(type, message, sdk::GetPeer());
+}
+
+void gt::send(GameUpdatePacket* packet, int extra_size, bool hook_send) {
+    static auto func = types::SendPacketRaw(sigs::get(sig::sendpacketraw));
+    void* PacketSender = nullptr;
+    if (hook_send) //if we want to apply our own code or just log shit
+        SendPacketRawHook::Execute(func, NET_MESSAGE_GAME_PACKET, packet, 56 + extra_size, PacketSender, sdk::GetPeer(), ENET_PACKET_FLAG_RELIABLE);
+    else
+        func(NET_MESSAGE_GAME_PACKET, packet, 56 + extra_size, PacketSender, sdk::GetPeer(), ENET_PACKET_FLAG_RELIABLE);
+}
+
+void gt::send_self(GameUpdatePacket* packet, bool hook_send) {
+    static auto func = types::ProcessTankUpdatePacket(sigs::get(sig::processtankupdatepacket));
+    if (hook_send) //if we want to apply our own code or just log shit
+        ProcessTankUpdatePacketHook::Execute(func, sdk::GetGameLogic(), packet);
+    else
+        func(sdk::GetGameLogic(), packet);
+}
+
+void gt::send_varlist_self(variantlist_t variantlist, int netid, int delay, bool hook_send) {
+    uint32_t data_size = 0;
+    void* data = variantlist.serialize_to_mem(&data_size, nullptr);
+
+    auto packet = (GameUpdatePacket*)calloc(sizeof(GameUpdatePacket) + data_size, 1);
+    packet->type = PACKET_CALL_FUNCTION;
+    packet->netid = netid;
+    packet->flags |= 8;
+    packet->int_data = delay;
+    packet->data_size = data_size;
+    memcpy(&packet->data, data, data_size);
+    
+   static auto func = types::ProcessTankUpdatePacket(sigs::get(sig::processtankupdatepacket));
+    if (hook_send) //if we want to apply our own code or just log shit
+        ProcessTankUpdatePacketHook::Execute(func, sdk::GetGameLogic(), packet);
+    else
+        func(sdk::GetGameLogic(), packet);
+    free(packet);
+    free(data);
+
 }
 
 bool gt::patch_banbypass() {

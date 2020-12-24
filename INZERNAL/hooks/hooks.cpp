@@ -261,7 +261,7 @@ void __cdecl hooks::UpdateFromNetAvatar(AvatarRenderData* render_data, NetAvatar
     orig::UpdateFromNetAvatar(render_data, player);
 }
 
-void __cdecl hooks::SendPacket(int type, const std::string& packet, ENetPeer* peer) {
+void __cdecl hooks::SendPacket(int type, std::string& packet, ENetPeer* peer) {
     SendPacketHook::Execute(orig::SendPacket, type, packet, peer);
 }
 
@@ -276,6 +276,7 @@ bool __cdecl hooks::CanSeeGhosts(int id) {
 }
 
 void __cdecl hooks::NetAvatar_Gravity(NetAvatar* player) {
+
     if (opt::cheat::gravity_on && player == sdk::GetGameLogic()->GetLocalPlayer()) {
         auto backup = player->gravity.get();
         player->gravity.set(opt::cheat::gravity_val);
@@ -288,14 +289,17 @@ void __cdecl hooks::NetAvatar_Gravity(NetAvatar* player) {
 
 void __cdecl hooks::ProcessAcceleration(NetAvatar* player, float speed) {
     orig::ProcessAcceleration(player, speed);
-    if (opt::cheat::movespeed_on && player == sdk::GetGameLogic()->GetLocalPlayer()) {
-        if (speed != 0.f) {
-            if ((opt::cheat::movespeed_start || (!opt::cheat::movespeed_start && fabsf(player->velocity_x.get()) >= 250.f))) {
-                player->velocity_x.set(speed > 0.f ? opt::cheat::movespeed_val : -opt::cheat::movespeed_val);
+
+    if (player == sdk::GetGameLogic()->GetLocalPlayer()) {
+        if (opt::cheat::movespeed_on) {
+            if (speed != 0.f) {
+                if ((opt::cheat::movespeed_start || (!opt::cheat::movespeed_start && fabsf(player->velocity_x.get()) >= 250.f))) {
+                    player->velocity_x.set(speed > 0.f ? opt::cheat::movespeed_val : -opt::cheat::movespeed_val);
+                }
             }
+            else if (opt::cheat::movespeed_stop)
+                player->velocity_x.set(0.f);
         }
-        else if (opt::cheat::movespeed_stop)
-            player->velocity_x.set(0.f);
     }
 }
 

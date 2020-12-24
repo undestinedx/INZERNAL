@@ -109,7 +109,7 @@ struct GameUpdatePacket {
         uint32_t particle_size_alt;
     };
     uint32_t data_size;
-    uint32_t data;
+    uint32_t data; //not officially a part of gameupdatepacket, thus sizeof(GameUpdatePacket) is 60 and not 56
 
     void debug_print(const char* name) {
         printf("---- start debug print ----\n");

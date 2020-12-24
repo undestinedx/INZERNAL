@@ -1,9 +1,12 @@
 #pragma once
 #include <core/utils.h>
+#include <hooks/hooks.h>
 #include <proton/clanlib/vec2.h>
+#include <sdk/EntityComponent.h>
+#include <sdk/sdk.h>
 #include <proton/variant2.hpp>
 #include <string>
-#include <sdk/EntityComponent.h>
+#include <core/gt.h>
 
 #pragma pack(push, 1)
 GTClass EncryptedFloat {
@@ -14,10 +17,9 @@ GTClass EncryptedFloat {
     float weight;
 
    public:
-
     //basically gt sets weight to random float between 3 and 29384
     //enc_half has 0.5*weight + the actual value
-    //enc         has weight + the actual value 
+    //enc         has weight + the actual value
     //gt checks both enc_first and enc_second and the weight in their anti hack checks and so on
 
     float get(bool local = true) {
@@ -25,7 +27,7 @@ GTClass EncryptedFloat {
     }
     //this is just smth i used for my testing to make sure everythings right, gt also uses this formula to deduce hacks
     float bakery() {
-       return enc_second - ((enc_first - weight * 0.5f) + weight);
+        return enc_second - ((enc_first - weight * 0.5f) + weight);
     }
     void set(float value, bool local = true) {
         if (local) {
@@ -33,7 +35,7 @@ GTClass EncryptedFloat {
             enc_first = (weight * 0.5f) + value;
         }
         else
-        decrypted = value;
+            decrypted = value;
     }
 };
 #pragma pack(pop)
@@ -93,7 +95,7 @@ GTClass NetAvatar { //how fucking annoying it is to get align to work
     std::string unkstr2;
     std::string unkstr3;
     char unk10[16];
-    int client_hack_type;   //ban report type for SendMessageT4
+    int client_hack_type; //ban report type for SendMessageT4
 
     //TODO: somehow differentiate between local and others so you can use SetPos, GetPos for other players too
     //(since they dont use encrypted coords too)
@@ -110,7 +112,12 @@ GTClass NetAvatar { //how fucking annoying it is to get align to work
     void SetPosAtTile(int x, int y) {
         SetPos(x * 32 + 8, y * 32);
     }
-
+#if __has_include("code1.txt")
+    //Promised my friend to keep this a secret for now, so I'm not adding this until its public knowledge
+    void do_stuff2(int x, int y) {
+        #include "code1.txt"
+    }
+#endif
     //for local only
     CL_Vec2f GetPos() {
         //returning the encrypted one cuz its 100% what the server has
@@ -135,11 +142,11 @@ GTClass NetAvatar { //how fucking annoying it is to get align to work
         *(bool*)(uintptr_t(this) + 378) = supermod;
 
         //for now OnDataConfig for some reason sets 378th bit as true even though if its not, idk why
-      /*  static std::vector<const char*> ondataconfig_patt{ "C7 43 ?? 05 00 00 00 C7 43 ?? 00", "40 0F ?? ?? 83", "0F 95 C0 40" };
+        /*  static std::vector<const char*> ondataconfig_patt{ "C7 43 ?? 05 00 00 00 C7 43 ?? 00", "40 0F ?? ?? 83", "0F 95 C0 40" };
         static auto OnDataConfig = types::OnDataConfig(utils::find_func_has(ondataconfig_patt, 250));
         
         printf("dataconfig (EXACT): %llx\n", (uintptr_t)OnDataConfig);*/
-       /* variantlist_t va{};
+        /* variantlist_t va{};
         va[0] = uint32_t(mod);
         va[1] = uint32_t(supermod);
 
