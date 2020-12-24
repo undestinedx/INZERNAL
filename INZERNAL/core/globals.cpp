@@ -9,7 +9,7 @@ namespace logging {
 		bool	enabled		= true; //master switch for all logging
 	
 		//logging in console
-		int		console		= sendpacketraw | processtank | callfunction;
+		int		console		= sendpacket | callfunction;
 
 		//logging in menu
 		int		max_count	= 500;  //max events in menu, for performance concerns.

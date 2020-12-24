@@ -6,7 +6,9 @@
 
 class ProcessTankUpdatePacketHook {
    public:
-    static void Execute(types::ProcessTankUpdatePacket orig, GameLogic* logic, GameUpdatePacket* packet) {
+    static void Execute(GameLogic* logic, GameUpdatePacket* packet) {
+        static auto orig = decltype(&hooks::ProcessTankUpdatePacket)(hookmgr->orig(sig::processtankupdatepacket));
+
         if (logging::enabled) {
             if (logging::console & logging::processtank)
                 printf("got raw packet: %d [%s]\n", packet->type, gt::get_type_string(packet->type).c_str());

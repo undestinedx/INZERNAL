@@ -46,24 +46,10 @@ class variantlist_t;
 class GameLogic;
 
 namespace types {
-	//hooks
-	using	App_GetVersion				= float(__cdecl*)(App*);
-	using	BaseApp_SetFPSLimit			= void(__cdecl*)(BaseApp*, float);
-	using	LogMsg						= int(__cdecl*)(const char*, ...);
-	using	NetAvatar_CanMessageT4		= bool(__cdecl*)(NetAvatar*);
-	using	CanPunchOrBuildNow			= bool(__cdecl*)(AvatarRenderData*);
-	using	ObjectMap_HandlePacket		= bool(__cdecl*)(WorldObjectMap*, GameUpdatePacket*);
+	//hooked
 	using	SendPacketRaw				= void(__cdecl*)(int, GameUpdatePacket*, int, void*, ENetPeer*, int);
 	using	SendPacket					= void(__cdecl*)(int, std::string&, ENetPeer*);
-	using	HandleTouch					= void(__cdecl*)(LevelTouchComponent*, CL_Vec2f, bool);
-	using	WorldCamera_OnUpdate		= void(__cdecl*)(WorldCamera*, CL_Vec2f, CL_Vec2f);
-	using	UpdateFromNetAvatar			= void(__cdecl*)(AvatarRenderData*, NetAvatar*);
-	using	EndScene					= long(__stdcall*)(IDirect3DDevice9*);
 	using	ProcessTankUpdatePacket		= void(__cdecl*)(GameLogic*, GameUpdatePacket*);
-	using	CanSeeGhosts				= bool(__cdecl*)(int);
-	using	NetAvatar_Gravity			= void(__cdecl*)(NetAvatar*);
-	using	NetHTTP_Update				= void(__cdecl*)(NetHTTP*);
-	using	ProcessAcceleration			= void(__cdecl*)(NetAvatar*, float);
 
 	//other functions, not hooked
 	using	WorldToScreen				= void(__cdecl*)(WorldCamera*, CL_Vec2f&, CL_Vec2f&);

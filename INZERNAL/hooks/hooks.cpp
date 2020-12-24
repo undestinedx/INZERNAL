@@ -12,30 +12,10 @@
 #include <iomanip>
 #include <thread>
 
-#define ORIGINAL(x) types::x hooks::orig::##x{};
-#define MAKEHOOK(x) MH_CreateHook(LPVOID(##x), hooks::##x, (void**)(&orig::##x));
+WNDPROC hooks::wndproc; //special cases which dont follow normal pattern
+LPVOID hooks::endscene;
 
-//necessary to set original hook
-ORIGINAL(App_GetVersion);
-ORIGINAL(BaseApp_SetFPSLimit);
-ORIGINAL(LogMsg);
-ORIGINAL(NetAvatar_CanMessageT4);
-ORIGINAL(CanPunchOrBuildNow);
-ORIGINAL(ObjectMap_HandlePacket);
-ORIGINAL(SendPacketRaw);
-ORIGINAL(HandleTouch);
-ORIGINAL(WorldCamera_OnUpdate);
-ORIGINAL(UpdateFromNetAvatar);
-ORIGINAL(SendPacket);
-ORIGINAL(ProcessTankUpdatePacket);
-ORIGINAL(CanSeeGhosts);
-ORIGINAL(NetAvatar_Gravity);
-ORIGINAL(NetHTTP_Update);
-ORIGINAL(EndScene);
-ORIGINAL(ProcessAcceleration);
-
-WNDPROC hooks::orig::wndproc; //wndproc is special case
-
+hookmanager* hookmgr = new hookmanager();
 IDirect3DDevice9* device = nullptr;
 bool canrender = false;
 
@@ -61,49 +41,17 @@ void hooks::init() {
     }
 
     auto vtable = *reinterpret_cast<void***>(device);
-    //releasing device fucks up vtable if loading with patcher so removed that part.
 
-    // clang-format off
+   
+    MH_CreateHook(LPVOID(vtable[42]), EndScene, (void**)(&hooks::endscene));
+    
+    //hooks can now be found in sigs.cpp, they are directly set up there
 
-	auto
-		App_GetVersion                  = sigs::get(sig::app_getversion),
-		BaseApp_SetFPSLimit             = sigs::get(sig::baseapp_setfpslimit),
-		LogMsg                          = sigs::get(sig::logmsg),
-		CanMessageT4                    = sigs::get(sig::canmessaget4),
-		CanPunchOrBuildNow              = sigs::get(sig::canpunchorbuildnow),
-		ObjectMap_HandlePacket          = sigs::get(sig::objectmap_handlepacket),
-		SendPacketRaw                   = sigs::get(sig::sendpacketraw),
-		HandleTouch                     = sigs::get(sig::handletouch),
-        WorldCamera_OnUpdate            = sigs::get(sig::worldcamera_onupdate),
-        UpdateFromNetAvatar             = sigs::get(sig::updatefromnetavatar),
-        SendPacket                      = sigs::get(sig::sendpacket),
-        ProcessTankUpdatePacket         = sigs::get(sig::processtankupdatepacket),
-        CanSeeGhosts                    = sigs::get(sig::canseeghosts),
-        NetAvatar_Gravity               = sigs::get(sig::gravity),
-        NetHTTP_Update                  = sigs::get(sig::nethttp_update),
-        ProcessAcceleration             = sigs::get(sig::processacceleration);
+    for (auto hk : hookmgr->hooks) 
+        MH_CreateHook(hk->address, hk->hooked, &hk->orig);
+    
 
-    MH_CreateHook(LPVOID(vtable[42]), EndScene, (void**)(&orig::EndScene));
-	MAKEHOOK(App_GetVersion);
-	MAKEHOOK(BaseApp_SetFPSLimit);
-	MAKEHOOK(LogMsg);
-	MAKEHOOK(NetAvatar_CanMessageT4);
-	MAKEHOOK(CanPunchOrBuildNow);
-	MAKEHOOK(ObjectMap_HandlePacket);
-	MAKEHOOK(SendPacketRaw);
-	MAKEHOOK(HandleTouch);
-    MAKEHOOK(WorldCamera_OnUpdate);
-    MAKEHOOK(UpdateFromNetAvatar);
-    MAKEHOOK(SendPacket);
-    MAKEHOOK(ProcessTankUpdatePacket);
-    MAKEHOOK(CanSeeGhosts);
-    MAKEHOOK(NetAvatar_Gravity);
-    MAKEHOOK(NetHTTP_Update);
-    MAKEHOOK(ProcessAcceleration);
-
-	orig::wndproc = WNDPROC(SetWindowLongPtrW(global::hwnd, -4, LONG_PTR(WndProc)));
-
-    // clang-format on
+    wndproc = WNDPROC(SetWindowLongPtrW(global::hwnd, -4, LONG_PTR(WndProc)));
 
     //TODO - update alt server shit
     //*(bool*)((uintptr_t)global::gt + 0x5EA071) = opt::alt_server;
@@ -113,7 +61,7 @@ void hooks::init() {
 }
 
 void hooks::destroy() {
-    SetWindowLongPtr(global::hwnd, -4, LONG_PTR(orig::wndproc));
+    SetWindowLongPtr(global::hwnd, -4, LONG_PTR(wndproc));
 RETRY:
     if (MH_OK != MH_DisableHook(MH_ALL_HOOKS)) {
         auto res = MessageBox(GetForegroundWindow(), L"Hooks could not be reverted", L"Internal", MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_TOPMOST);
@@ -129,14 +77,16 @@ RETRY:
 }
 
 float __cdecl hooks::App_GetVersion(App* app) {
+    static auto orig = decltype(&hooks::App_GetVersion)(hookmgr->orig(sig::app_getversion));
     if (!global::app) {
         global::app = app;
-        orig::BaseApp_SetFPSLimit((BaseApp*)app, opt::fps_limit);
+        static auto orig_fps = decltype(&hooks::BaseApp_SetFPSLimit)(hookmgr->orig(sig::baseapp_setfpslimit));
+        orig_fps((BaseApp*)app, opt::fps_limit);
         utils::unprotect_process();
         utils::printc("93", "Modified FPS limit!");
     }
     float version = opt::gt_version;
-    static float real_ver = orig::App_GetVersion(app);
+    static float real_ver = orig(app);
     if (real_ver > version) //dont spoof if we are running newer client. internal might just be outdated, avoid recompilation.
         version = real_ver;
     else
@@ -146,11 +96,13 @@ float __cdecl hooks::App_GetVersion(App* app) {
 }
 
 void __cdecl hooks::BaseApp_SetFPSLimit(BaseApp* ba, float fps) {
+    static auto orig = decltype(&hooks::BaseApp_SetFPSLimit)(hookmgr->orig(sig::baseapp_setfpslimit));
     utils::printc("93", "[INZERNAL]\trequest to set fps to %.0f, setting to %.0f instead", fps, opt::fps_limit);
-    orig::BaseApp_SetFPSLimit(ba, opt::fps_limit);
+    orig(ba, opt::fps_limit);
 }
 
 int __cdecl hooks::LogMsg(const char* msg, ...) {
+    static auto orig = decltype(&hooks::LogMsg)(hookmgr->orig(sig::logmsg));
     char buf[0x1000u];
     int len = -1;
     va_list va;
@@ -165,7 +117,7 @@ int __cdecl hooks::LogMsg(const char* msg, ...) {
         if (logging::enabled && logging::console & logging::logmsg)
             utils::printc("88", "LogMsg\t%s", buf);
     }
-    return orig::LogMsg(buf);
+    return orig(buf);
 }
 
 bool __cdecl hooks::NetAvatar_CanMessageT4(NetAvatar* player) {
@@ -187,9 +139,11 @@ LRESULT __stdcall hooks::WndProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lpara
     if (msg == WM_KEYUP && wparam == VK_F3)
         global::unload = true;
 
-    return CallWindowProcW(hooks::orig::wndproc, wnd, msg, wparam, lparam);
+    return CallWindowProcW(hooks::wndproc, wnd, msg, wparam, lparam);
 }
 bool __cdecl hooks::CanPunchOrBuildNow(AvatarRenderData* render_data) {
+    //grr i wanted to get type of self func automatically but didnt find a way to do
+    static auto orig = decltype(&hooks::CanPunchOrBuildNow)(hookmgr->orig(sig::canpunchorbuildnow));
     if (opt::cheat::punch_cooldown_on) {
         static auto time_before = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_sec = std::chrono::system_clock::now() - time_before;
@@ -201,7 +155,7 @@ bool __cdecl hooks::CanPunchOrBuildNow(AvatarRenderData* render_data) {
             return false;
     }
 
-    return orig::CanPunchOrBuildNow(render_data);
+    return orig(render_data);
 }
 
 bool __cdecl hooks::ObjectMap_HandlePacket(WorldObjectMap* map, GameUpdatePacket* packet) {
@@ -229,15 +183,16 @@ bool __cdecl hooks::ObjectMap_HandlePacket(WorldObjectMap* map, GameUpdatePacket
     //	packet->debug_print("packet");
     //	utils::print("%d %f %f\n", packet->netid, packet->pos_x, packet->pos_y);
     //}
-
-    return orig::ObjectMap_HandlePacket(map, packet);
+    static auto orig = decltype(&hooks::ObjectMap_HandlePacket)(hookmgr->orig(sig::objectmap_handlepacket));
+    return orig(map, packet);
 }
 
 void __cdecl hooks::SendPacketRaw(int type, GameUpdatePacket* packet, int size, void* packetsender, ENetPeer* peer, int flag) {
-    SendPacketRawHook::Execute(orig::SendPacketRaw, type, packet, size, packetsender, peer, flag);
+    SendPacketRawHook::Execute(type, packet, size, packetsender, peer, flag);
 }
 
 void __cdecl hooks::HandleTouch(LevelTouchComponent* touch, CL_Vec2f pos, bool started) {
+    static auto orig = decltype(&hooks::HandleTouch)(hookmgr->orig(sig::handletouch));
     if (opt::tp_click && GetAsyncKeyState(VK_CONTROL)) {
         //localplayer is guaranteed to be a valid pointer here according to xrefs
         auto local = sdk::GetGameLogic()->GetLocalPlayer();
@@ -246,49 +201,53 @@ void __cdecl hooks::HandleTouch(LevelTouchComponent* touch, CL_Vec2f pos, bool s
         pos = new_pos;
     }
     else
-        orig::HandleTouch(touch, pos, started);
+        orig(touch, pos, started);
 }
 
 void __cdecl hooks::WorldCamera_OnUpdate(WorldCamera* camera, CL_Vec2f unk, CL_Vec2f unk2) {
+    static auto orig = decltype(&hooks::WorldCamera_OnUpdate)(hookmgr->orig(sig::worldcamera_onupdate));
     if (opt::tp_click && GetAsyncKeyState(VK_CONTROL)) //if we dont do this then there is major sliding when teleporting.
         return;
 
-    orig::WorldCamera_OnUpdate(camera, unk, unk2);
+    orig(camera, unk, unk2);
 }
 
 //for future usage
 void __cdecl hooks::UpdateFromNetAvatar(AvatarRenderData* render_data, NetAvatar* player) {
-    orig::UpdateFromNetAvatar(render_data, player);
+    static auto orig = decltype(&hooks::UpdateFromNetAvatar)(hookmgr->orig(sig::updatefromnetavatar));
+    orig(render_data, player);
 }
 
 void __cdecl hooks::SendPacket(int type, std::string& packet, ENetPeer* peer) {
-    SendPacketHook::Execute(orig::SendPacket, type, packet, peer);
+    SendPacketHook::Execute(type, packet, peer);
 }
 
 void __cdecl hooks::ProcessTankUpdatePacket(GameLogic* logic, GameUpdatePacket* packet) {
-    ProcessTankUpdatePacketHook::Execute(orig::ProcessTankUpdatePacket, logic, packet);
+    ProcessTankUpdatePacketHook::Execute(logic, packet);
 }
 
 bool __cdecl hooks::CanSeeGhosts(int id) {
+    static auto orig = decltype(&hooks::CanSeeGhosts)(hookmgr->orig(sig::canseeghosts));
     if (opt::see_ghosts)
         return true;
-    return orig::CanSeeGhosts(id);
+    return orig(id);
 }
 
 void __cdecl hooks::NetAvatar_Gravity(NetAvatar* player) {
-
+    static auto orig = decltype(&hooks::NetAvatar_Gravity)(hookmgr->orig(sig::gravity));
     if (opt::cheat::gravity_on && player == sdk::GetGameLogic()->GetLocalPlayer()) {
         auto backup = player->gravity.get();
         player->gravity.set(opt::cheat::gravity_val);
-        orig::NetAvatar_Gravity(player);
+        orig(player);
         player->gravity.set(backup);
     }
     else
-        orig::NetAvatar_Gravity(player);
+        orig(player);
 }
 
 void __cdecl hooks::ProcessAcceleration(NetAvatar* player, float speed) {
-    orig::ProcessAcceleration(player, speed);
+    static auto orig = decltype(&hooks::ProcessAcceleration)(hookmgr->orig(sig::processacceleration));
+    orig(player, speed);
 
     if (player == sdk::GetGameLogic()->GetLocalPlayer()) {
         if (opt::cheat::movespeed_on) {
@@ -304,6 +263,7 @@ void __cdecl hooks::ProcessAcceleration(NetAvatar* player, float speed) {
 }
 
 void __cdecl hooks::NetHTTP_Update(NetHTTP* http) {
+    static auto orig = decltype(&hooks::NetHTTP_Update)(hookmgr->orig(sig::nethttp_update));
     if (http->m_serverName.find("iap-mob.ubi.com") != -1) //block ubisoft iap http spam shit.
         return;
 
@@ -313,10 +273,11 @@ void __cdecl hooks::NetHTTP_Update(NetHTTP* http) {
         utils::replace(http->m_serverName, "growtopia1.com", opt::custom_server_val);
     }
 
-    orig::NetHTTP_Update(http);
+    orig(http);
 }
 
 long __stdcall hooks::EndScene(IDirect3DDevice9* device) {
+    static auto orig = decltype(&hooks::EndScene)(endscene);
     menu::EndScene(device, active); //Imgui happens here
-    return orig::EndScene(device);
+    return orig(device);
 }

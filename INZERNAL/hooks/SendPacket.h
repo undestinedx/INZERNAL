@@ -8,7 +8,8 @@
 
 class SendPacketHook {
    public:
-    static void Execute(types::SendPacket orig, int type, std::string& packet, ENetPeer* peer) {
+    static void Execute(int type, std::string& packet, ENetPeer* peer) {
+        static auto orig = decltype(&hooks::SendPacket)(hookmgr->orig(sig::sendpacket));
         if (type == NET_MESSAGE_CLIENT_LOG_RESPONSE) //dont send crash log to gt.
             return;
 

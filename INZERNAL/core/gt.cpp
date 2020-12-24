@@ -78,7 +78,7 @@ std::string gt::get_type_string(uint8_t type) {
 void gt::send(int type, std::string& message, bool hook_send) {
     static auto func = types::SendPacket(sigs::get(sig::sendpacket));
     if (hook_send) //if we want to apply our own code or just log shit
-        SendPacketHook::Execute(func, type, message, sdk::GetPeer());
+        SendPacketHook::Execute( type, message, sdk::GetPeer());
     else
         func(type, message, sdk::GetPeer());
 }
@@ -87,7 +87,7 @@ void gt::send(GameUpdatePacket* packet, int extra_size, bool hook_send) {
     static auto func = types::SendPacketRaw(sigs::get(sig::sendpacketraw));
     void* PacketSender = nullptr;
     if (hook_send) //if we want to apply our own code or just log shit
-        SendPacketRawHook::Execute(func, NET_MESSAGE_GAME_PACKET, packet, 56 + extra_size, PacketSender, sdk::GetPeer(), ENET_PACKET_FLAG_RELIABLE);
+        SendPacketRawHook::Execute(NET_MESSAGE_GAME_PACKET, packet, 56 + extra_size, PacketSender, sdk::GetPeer(), ENET_PACKET_FLAG_RELIABLE);
     else
         func(NET_MESSAGE_GAME_PACKET, packet, 56 + extra_size, PacketSender, sdk::GetPeer(), ENET_PACKET_FLAG_RELIABLE);
 }
@@ -95,7 +95,7 @@ void gt::send(GameUpdatePacket* packet, int extra_size, bool hook_send) {
 void gt::send_self(GameUpdatePacket* packet, bool hook_send) {
     static auto func = types::ProcessTankUpdatePacket(sigs::get(sig::processtankupdatepacket));
     if (hook_send) //if we want to apply our own code or just log shit
-        ProcessTankUpdatePacketHook::Execute(func, sdk::GetGameLogic(), packet);
+        ProcessTankUpdatePacketHook::Execute(sdk::GetGameLogic(), packet);
     else
         func(sdk::GetGameLogic(), packet);
 }
@@ -114,7 +114,7 @@ void gt::send_varlist_self(variantlist_t variantlist, int netid, int delay, bool
     
    static auto func = types::ProcessTankUpdatePacket(sigs::get(sig::processtankupdatepacket));
     if (hook_send) //if we want to apply our own code or just log shit
-        ProcessTankUpdatePacketHook::Execute(func, sdk::GetGameLogic(), packet);
+        ProcessTankUpdatePacketHook::Execute(sdk::GetGameLogic(), packet);
     else
         func(sdk::GetGameLogic(), packet);
     free(packet);

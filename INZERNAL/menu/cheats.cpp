@@ -8,7 +8,7 @@ void menu::cheats_tab() {
     ImGui::Text("This tab is work in progress at the moment.");
 
     //we don't need to build this for others, since a private feature for now
-#ifdef __has_include("code1.txt")
+#if __has_include("code1.txt")
     if (ImGui::Button("Perform magic")) {
         auto pos = local->GetPos();
         local->do_stuff2(int(pos.x / 32.f) - 3, int(pos.y / 32.f) - 3);

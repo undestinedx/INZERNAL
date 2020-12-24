@@ -13,36 +13,48 @@
 
 #include <core/globals.h>
 #include <core/minhook/hook.h>
+#include <proton/NetHTTP.h>
 #include <proton/Variant.h>
 #include <string.h>
-#include <proton/NetHTTP.h>
 
+class hookinfo {
+   public:
+    int sig_num{};
+    std::string name{};
+    std::string pattern{};
+    LPVOID address{};
+    void* hooked;
+    void* orig;
+};
+class hookmanager {
+   public:
+    std::vector<hookinfo*> hooks{};
 
-#define TYPE(x) extern types::x x
+    void add_hook(std::string name, std::string pattern, int type, void* hooked, int offset = 0 ) {
+        auto address = sigs::add_pattern(name, pattern, type, offset);
+        hookinfo* hk = new hookinfo();
+        hk->address = (LPVOID)address;
+        hk->name = name;
+        hk->pattern = pattern;
+        hk->sig_num = sigs::database.size() - 1;
+        hk->hooked = hooked;
+        hooks.push_back(std::move(hk));
+    }
 
+    void* orig(int i) {
+        for (auto hook : hooks) {
+            if (hook->sig_num == i)
+                return hook->orig;
+        }
+
+        return nullptr;
+    }
+};
+extern hookmanager* hookmgr;
 namespace hooks {
 
-    namespace orig {
-        TYPE(App_GetVersion);
-        TYPE(BaseApp_SetFPSLimit);
-        TYPE(LogMsg);
-        TYPE(NetAvatar_CanMessageT4);
-        TYPE(CanPunchOrBuildNow);
-        TYPE(ObjectMap_HandlePacket);
-        TYPE(SendPacketRaw);
-        TYPE(HandleTouch);
-        TYPE(WorldCamera_OnUpdate);
-        TYPE(UpdateFromNetAvatar);
-        TYPE(SendPacket);
-        TYPE(EndScene);
-        TYPE(ProcessTankUpdatePacket);
-        TYPE(CanSeeGhosts);
-        TYPE(NetAvatar_Gravity);
-        TYPE(NetHTTP_Update);
-        TYPE(ProcessAcceleration);
-
-        extern WNDPROC wndproc;
-    } // namespace orig
+    extern WNDPROC wndproc;
+    extern LPVOID endscene;
 
     void init();
     void destroy();
@@ -67,9 +79,7 @@ namespace hooks {
     void    __cdecl     NetHTTP_Update(NetHTTP* http);
     long    __stdcall   EndScene(IDirect3DDevice9* device);
 
-
     LRESULT __stdcall   WndProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam);
-
 
     // clang-format on
 

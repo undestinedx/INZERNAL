@@ -5,7 +5,9 @@
 
 class SendPacketRawHook {
    public:
-    static void Execute(types::SendPacketRaw orig, int type, GameUpdatePacket* packet, int size, void* packetsender, ENetPeer* peer, int flag) {
+    static void Execute(int type, GameUpdatePacket* packet, int size, void* packetsender, ENetPeer* peer, int flag) {
+        static auto orig = decltype(&hooks::SendPacketRaw)(hookmgr->orig(sig::sendpacketraw));
+
         if (opt::cheat::block_sendpacketraw)
             return;
 
