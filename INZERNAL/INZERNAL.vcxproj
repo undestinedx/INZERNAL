@@ -99,6 +99,7 @@
     <ClInclude Include="hooks\ProcessTankUpdatePacket.h" />
     <ClInclude Include="hooks\SendPacket.h" />
     <ClInclude Include="hooks\SendPacketRaw.h" />
+    <ClInclude Include="hooks\Update.h" />
     <ClInclude Include="menu\imwrap.h" />
     <ClInclude Include="menu\imgui\imconfig.h" />
     <ClInclude Include="menu\imgui\imgui.h" />

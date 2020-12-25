@@ -8,22 +8,20 @@ namespace sig {
         gamelogic = 1,
         world2screen,
         enetclient,
-        app_getversion,
         baseapp_setfpslimit,
         logmsg,
         canmessaget4,
         canpunchorbuildnow,
-        objectmap_handlepacket,
         sendpacketraw,
         handletouch,
         worldcamera_onupdate,
-        updatefromnetavatar,
         sendpacket,
         processtankupdatepacket,
         canseeghosts,
         gravity,
         nethttp_update,
-        processacceleration
+        processacceleration,
+        app_update
     };
 
     namespace type {

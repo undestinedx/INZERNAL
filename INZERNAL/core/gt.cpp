@@ -75,7 +75,7 @@ std::string gt::get_type_string(uint8_t type) {
     return types[type];
 }
 
-void gt::send(int type, std::string& message, bool hook_send) {
+void gt::send(int type, std::string message, bool hook_send) {
     static auto func = types::SendPacket(sigs::get(sig::sendpacket));
     if (hook_send) //if we want to apply our own code or just log shit
         SendPacketHook::Execute( type, message, sdk::GetPeer());
@@ -141,4 +141,69 @@ bool gt::patch_banbypass() {
         return false;
     }
     return false;
+}
+
+void gt::hit_tile(CL_Vec2i where) {
+    auto local = sdk::GetGameLogic()->GetLocalPlayer();
+    if (!local)
+        return;
+
+    GameUpdatePacket packet{ 0 };
+    packet.type = PACKET_TILE_CHANGE_REQUEST;
+    packet.item = 18;
+    packet.int_x = where.x;
+    packet.int_y = where.y;
+    auto pos = local->GetPos();
+    packet.pos_x = pos.x;
+    packet.pos_y = pos.y;
+    gt::send(&packet);
+}
+
+void gt::place_tile(int id, CL_Vec2i where) {
+    auto local = sdk::GetGameLogic()->GetLocalPlayer();
+    if (!local)
+        return;
+
+    GameUpdatePacket packet{ 0 };
+    packet.type = PACKET_TILE_CHANGE_REQUEST;
+    packet.item = id;
+    packet.int_x = where.x;
+    packet.int_y = where.y;
+    auto pos = local->GetPos();
+    packet.pos_x = pos.x;
+    packet.pos_y = pos.y;
+    gt::send(&packet);
+}
+
+void gt::wrench_tile(CL_Vec2i where) {
+    auto local = sdk::GetGameLogic()->GetLocalPlayer();
+    if (!local)
+        return;
+
+    GameUpdatePacket packet{ 0 };
+    packet.type = PACKET_TILE_CHANGE_REQUEST;
+    packet.item = 32;
+    packet.int_x = where.x;
+    packet.int_y = where.y;
+    auto pos = local->GetPos();
+    packet.pos_x = pos.x;
+    packet.pos_y = pos.y;
+    gt::send(&packet);
+}
+void gt::water_tile(CL_Vec2i where) {
+     auto local = sdk::GetGameLogic()->GetLocalPlayer();
+    if (!local)
+        return;
+
+    GameUpdatePacket packet{ 0 };
+    packet.type = PACKET_STATE;
+    packet.item = 822;
+    packet.int_x = where.x;
+    packet.int_y = where.y;
+    packet.flags = (1 << 5) | (1 << 10) | (1 << 11); //no enum rn so using raw values
+   
+    auto pos = local->GetPos();
+    packet.pos_x = pos.x;
+    packet.pos_y = pos.y;
+    gt::send(&packet);
 }

@@ -413,6 +413,9 @@
     <ClInclude Include="sdk\player\NetAvatar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="hooks\Update.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="inzernal.def">

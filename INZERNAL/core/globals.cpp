@@ -21,7 +21,7 @@ namespace opt {
 
 	//enhanchements 
 	float		fps_limit	= 144.0f;	//fps limit gets forced to this
-	float		gt_version	= 3.51f;	//gt version gets spoofed to this
+	std::string	gt_version	= "3.51";	//gt version gets spoofed to this
 	bool		tp_click	= true;		//when on, holding CTRL allows you to tp to mouse location.
 	bool		mod_zoom	= true;		//unlimited zoom. Cant ban you. cant punch further, only view. NOTE: If for some reason you can punch further, re-join.
 	bool		see_ghosts	= true;		//allows you to see ghosts so you can avoid constant slime
@@ -30,7 +30,6 @@ namespace opt {
 	WinSpoof	spoof_win	= ::wsMimic;	//Mode of zf/fz spoofing mode. See the WinSpoof enum for more details.
 	FlagMode	flag_mode	= ::fmRandom; //See FlagMode enum for details.
 	std::string	flag		= "us";		//set if flag_mode is set to fmCustom
-	bool		alt_server	= true;		//always use alternative server for login, because growtopia1 (main logon server) has issues with freezing.
 
 	bool		custom_server_on	= false;	//when on it uses 
 	std::string	custom_server_val	= "127.0.0.1"; //localhost works with proxy. custom servers and growtopia2/1 work too.

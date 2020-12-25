@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <iomanip>
 #include <thread>
+#include <hooks/Update.h>
 
 WNDPROC hooks::wndproc; //special cases which dont follow normal pattern
 LPVOID hooks::endscene;
@@ -40,17 +41,13 @@ void hooks::init() {
         return;
     }
 
-    auto vtable = *reinterpret_cast<void***>(device);
-
-   
+    auto vtable = *reinterpret_cast<void***>(device); 
     MH_CreateHook(LPVOID(vtable[42]), EndScene, (void**)(&hooks::endscene));
     
     //hooks can now be found in sigs.cpp, they are directly set up there
-
     for (auto hk : hookmgr->hooks) 
         MH_CreateHook(hk->address, hk->hooked, &hk->orig);
     
-
     wndproc = WNDPROC(SetWindowLongPtrW(global::hwnd, -4, LONG_PTR(WndProc)));
 
     //TODO - update alt server shit
@@ -76,28 +73,8 @@ RETRY:
     }
 }
 
-float __cdecl hooks::App_GetVersion(App* app) {
-    static auto orig = decltype(&hooks::App_GetVersion)(hookmgr->orig(sig::app_getversion));
-    if (!global::app) {
-        global::app = app;
-        static auto orig_fps = decltype(&hooks::BaseApp_SetFPSLimit)(hookmgr->orig(sig::baseapp_setfpslimit));
-        orig_fps((BaseApp*)app, opt::fps_limit);
-        utils::unprotect_process();
-        utils::printc("93", "Modified FPS limit!");
-    }
-    float version = opt::gt_version;
-    static float real_ver = orig(app);
-    if (real_ver > version) //dont spoof if we are running newer client. internal might just be outdated, avoid recompilation.
-        version = real_ver;
-    else
-        utils::printc("93", "spoofed version: %.3f", version);
-
-    return version;
-}
-
 void __cdecl hooks::BaseApp_SetFPSLimit(BaseApp* ba, float fps) {
     static auto orig = decltype(&hooks::BaseApp_SetFPSLimit)(hookmgr->orig(sig::baseapp_setfpslimit));
-    utils::printc("93", "[INZERNAL]\trequest to set fps to %.0f, setting to %.0f instead", fps, opt::fps_limit);
     orig(ba, opt::fps_limit);
 }
 
@@ -121,7 +98,8 @@ int __cdecl hooks::LogMsg(const char* msg, ...) {
 }
 
 bool __cdecl hooks::NetAvatar_CanMessageT4(NetAvatar* player) {
-    printf("CanMessageT4 called!!!\n");
+    utils::printc("1;40;31", "CanMessageT4 called, there is a chance of ban, so automatically left the world.");
+    gt::send(3, "action|quit_to_exit");
     return false;
 }
 
@@ -158,41 +136,15 @@ bool __cdecl hooks::CanPunchOrBuildNow(AvatarRenderData* render_data) {
     return orig(render_data);
 }
 
-bool __cdecl hooks::ObjectMap_HandlePacket(WorldObjectMap* map, GameUpdatePacket* packet) {
-    //CL_Vec2f pos_obj{ packet->pos_x, packet->pos_y };
-    //auto player = sdk::gamelogic()->GetLocalPlayer();
-    //auto ret = orig::WorldObjectMap_HandlePacket(map, packet);
-    //if (player && pos_obj.x > 0.1f && pos_obj.y > 0.1f && ret) {
-
-    //	/*	player->set_pos(packet->pos_x - 4.f, packet->pos_y - 4.f);
-    //		player->set_pos(packet->pos_x, packet->pos_y - 4.f);
-    //		player->set_pos(packet->pos_x - 4.f, packet->pos_y);
-    //		player->set_pos(packet->pos_x , packet->pos_y );
-    //		player->set_pos(packet->pos_x + 4.f, packet->pos_y + 4.f);
-    //		player->set_pos(packet->pos_x, packet->pos_y + 4.f);
-    //		player->set_pos(packet->pos_x + 4.f, packet->pos_y);*/
-
-    //		/*pickup.active = true;
-    //		pickup.pos = pos_obj;
-    //		pickup.netid = packet->netid;
-    //		time_ = std::chrono::system_clock::now() + std::chrono::milliseconds(150);*/
-
-    //		/*	auto pos_pl = player->get_pos();
-    //			utils::print("%f %f\n", pos_pl.x, pos_pl.y);*/
-    //			//utils::print("%f %f\n", player->m_pos.x, player->m_pos.y);
-    //	packet->debug_print("packet");
-    //	utils::print("%d %f %f\n", packet->netid, packet->pos_x, packet->pos_y);
-    //}
-    static auto orig = decltype(&hooks::ObjectMap_HandlePacket)(hookmgr->orig(sig::objectmap_handlepacket));
-    return orig(map, packet);
-}
-
 void __cdecl hooks::SendPacketRaw(int type, GameUpdatePacket* packet, int size, void* packetsender, ENetPeer* peer, int flag) {
     SendPacketRawHook::Execute(type, packet, size, packetsender, peer, flag);
 }
 
 void __cdecl hooks::HandleTouch(LevelTouchComponent* touch, CL_Vec2f pos, bool started) {
     static auto orig = decltype(&hooks::HandleTouch)(hookmgr->orig(sig::handletouch));
+
+    //TODO: WorldCamera::WorldToScreen to check if pos is within imgui menu when global::draw 
+
     if (opt::tp_click && GetAsyncKeyState(VK_CONTROL)) {
         //localplayer is guaranteed to be a valid pointer here according to xrefs
         auto local = sdk::GetGameLogic()->GetLocalPlayer();
@@ -210,12 +162,6 @@ void __cdecl hooks::WorldCamera_OnUpdate(WorldCamera* camera, CL_Vec2f unk, CL_V
         return;
 
     orig(camera, unk, unk2);
-}
-
-//for future usage
-void __cdecl hooks::UpdateFromNetAvatar(AvatarRenderData* render_data, NetAvatar* player) {
-    static auto orig = decltype(&hooks::UpdateFromNetAvatar)(hookmgr->orig(sig::updatefromnetavatar));
-    orig(render_data, player);
 }
 
 void __cdecl hooks::SendPacket(int type, std::string& packet, ENetPeer* peer) {
@@ -280,4 +226,9 @@ long __stdcall hooks::EndScene(IDirect3DDevice9* device) {
     static auto orig = decltype(&hooks::EndScene)(endscene);
     menu::EndScene(device, active); //Imgui happens here
     return orig(device);
+}
+
+//ideal hook for all kinds of continuous loops and also conveniently gets us app
+void __cdecl hooks::App_Update(App* app) {
+    UpdateHook::Execute(app);
 }

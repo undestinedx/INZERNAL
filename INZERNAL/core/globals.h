@@ -100,7 +100,7 @@ namespace logging {
 
 namespace opt {
 	
-	extern float		gt_version;
+	extern std::string	gt_version;
 	extern float		fps_limit;
 	extern bool			tp_click;
 	extern bool			mod_zoom;
@@ -110,7 +110,6 @@ namespace opt {
 	extern WinSpoof		spoof_win;
 	extern FlagMode		flag_mode;
 	extern std::string	flag;
-	extern bool			alt_server;
 
 	extern bool			custom_server_on;
 	extern std::string	custom_server_val;

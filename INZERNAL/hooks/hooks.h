@@ -61,16 +61,13 @@ namespace hooks {
 
     // clang-format off
 
-	float	__cdecl		App_GetVersion(App* app);
 	void	__cdecl		BaseApp_SetFPSLimit(BaseApp* ba, float fps);
 	int		__cdecl		LogMsg(const char* msg, ...);
 	bool	__cdecl		NetAvatar_CanMessageT4(NetAvatar* player);
 	bool	__cdecl		CanPunchOrBuildNow(AvatarRenderData* render_data);
-	bool	__cdecl		ObjectMap_HandlePacket(WorldObjectMap* map, GameUpdatePacket* packet);
 	void	__cdecl		SendPacketRaw(int type, GameUpdatePacket* packet, int size, void* packetsender, ENetPeer* peer, int flag);
 	void	__cdecl		HandleTouch(LevelTouchComponent* touch, CL_Vec2f pos, bool started);
     void    __cdecl     WorldCamera_OnUpdate(WorldCamera* camera, CL_Vec2f unk, CL_Vec2f unk2);
-    void    __cdecl     UpdateFromNetAvatar(AvatarRenderData* render_data, NetAvatar* player);
     void    __cdecl     SendPacket(int type, std::string& packet, ENetPeer* peer);
     void    __cdecl     ProcessTankUpdatePacket(GameLogic* logic, GameUpdatePacket* packet);
     bool    __cdecl     CanSeeGhosts(int id);
@@ -78,6 +75,7 @@ namespace hooks {
     void    __cdecl     ProcessAcceleration(NetAvatar* player, float speed);
     void    __cdecl     NetHTTP_Update(NetHTTP* http);
     long    __stdcall   EndScene(IDirect3DDevice9* device);
+    void    __cdecl     App_Update(App* app);
 
     LRESULT __stdcall   WndProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam);
 

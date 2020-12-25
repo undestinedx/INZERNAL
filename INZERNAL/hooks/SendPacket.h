@@ -22,6 +22,9 @@ class SendPacketHook {
             auto hash_str = mac + "RT";
             auto hash2 = HashString(hash_str.c_str(), hash_str.length());
 
+            if (var.get("game_version") != opt::gt_version) //not optimal due to not checking if float is bigger
+                var.set("game_version", opt::gt_version);
+
             var.set("mac", mac);
             var.set("wk", gt::generate_rid());
             var.set("rid", gt::generate_rid());

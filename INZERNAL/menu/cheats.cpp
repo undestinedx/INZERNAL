@@ -22,6 +22,56 @@ void menu::cheats_tab() {
         static auto func = fuck((uintptr_t)global::gt + 0x3978F0);
         func(local, (char*)&flags);
     }
+
+    printf("%f\n", * (float*)((uintptr_t)global::app + 3604));
+    static float speed = 400.0f;
+    if (ImGui::SliderFloat("Max fall speed", &speed, 0.f, 3000.0f)) {  
+        EncryptedFloat* ptr = (EncryptedFloat*)((uintptr_t)global::gt + 0x6854A8);
+        float total = 0.0f;
+        float delta = speed - ptr->get();
+        ptr->set(speed);
+        *(float*)((uintptr_t)global::app + 3604) += delta;
+    }
+    static float control = 0.15f;
+    if (ImGui::SliderFloat("Control mod when hurt", &control, 0.f, 2.f)) {
+        EncryptedFloat* ptr = (EncryptedFloat*)((uintptr_t)global::gt + 0x685518);
+        float total = 0.0f;
+        float delta = control - ptr->get();
+        ptr->set(control);
+        *(float*)((uintptr_t)global::app + 3604) += delta;
+    }
+    static float bounce = 300.0f;
+    if (ImGui::SliderFloat("Lava bounce X", &bounce, 0.f, 1000.0f)) {
+        EncryptedFloat* ptr = (EncryptedFloat*)((uintptr_t)global::gt + 0x685528);
+        float total = 0.0f;
+        float delta = bounce - ptr->get();
+        ptr->set(bounce);
+        *(float*)((uintptr_t)global::app + 3604) += delta;
+    }
+    static float thousand = 1000.0f;
+    if (ImGui::SliderFloat("Physics speed", &thousand, 0.f, 3000.0f)) {
+        EncryptedFloat* ptr = (EncryptedFloat*)((uintptr_t)global::gt + 0x6855A8);
+        float total = 0.0f;
+        float delta = thousand - ptr->get();
+        ptr->set(thousand);
+      //  *(float*)((uintptr_t)global::app + 3604) += delta;
+    }
+    static float watertime = 3000.0f;
+    if (ImGui::SliderFloat("Water levitation time", &watertime, 0.f, 5000.f)) {
+        EncryptedFloat* ptr = (EncryptedFloat*)((uintptr_t)global::gt + 0x6855C8);
+        float total = 0.0f;
+        float delta = watertime - ptr->get();
+        ptr->set(watertime);
+        //  *(float*)((uintptr_t)global::app + 3604) += delta;
+    }
+    static float punch = 0.2f;
+    if (ImGui::SliderFloat("Punch reload time", &punch, 0.f, 2.f)) {
+        EncryptedFloat* ptr = (EncryptedFloat*)((uintptr_t)global::gt + 0x6855D8);
+        float total = 0.0f;
+        float delta = punch - ptr->get();
+        ptr->set(punch);
+        //  *(float*)((uintptr_t)global::app + 3604) += delta;
+    }
     if (ImGui::CollapsingHeader("Punch/build cooldown changer")) {
         if (ImGui::BeginChild("###cooldownchanger", ImVec2(ImGui::GetWindowWidth() * 0.93f, 60.f), true)) {
             ImGui::Checkbox("Enabled###punch", &opt::cheat::punch_cooldown_on);

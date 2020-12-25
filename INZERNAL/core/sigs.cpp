@@ -39,22 +39,20 @@ void sigs::init() {
 
    
     //all hooks.cpp
-    hookmgr->add_hook("App::GetVersion", "28 FF 15 ?? ?? ?? ?? FF 15", sig::type::fstart, hooks::App_GetVersion);
     hookmgr->add_hook("BaseApp::SetFPSLimit", "00 00 0F 57 C0 0F 2F C8 72", sig::type::fstart, hooks::BaseApp_SetFPSLimit);
     hookmgr->add_hook("LogMsg", "00 28 00 00 45", sig::type::fstart, hooks::LogMsg);
     hookmgr->add_hook("NetAvatar::CanMessageT4", "48 8b ce e8 ? ? ? ? 84 c0 74 ? e8", sig::type::call, hooks::NetAvatar_CanMessageT4, 3);
     hookmgr->add_hook("CanPunchOrBuildNow", "00 00 83 e9 03 74 ? 83 e9 01 74 ? 83 e9 01", sig::type::fstart, hooks::CanPunchOrBuildNow);
-    hookmgr->add_hook("ObjectMap::HandlePacket", "44 8B ?? ?? 41 83 f8 FF 75 ?? 44", sig::type::fstart, hooks::ObjectMap_HandlePacket);
     hookmgr->add_hook("SendPacketRaw", "00 81 FE 40 42 0F 00", sig::type::fstart, hooks::SendPacketRaw);
     hookmgr->add_hook("HandleTouch", "83 B8 ?? ?? ?? ?? 12 75", sig::type::fstart,hooks::HandleTouch);
     hookmgr->add_hook("WorldCamera_OnUpdate", "89 43 10 0f 2f", sig::type::fstart, hooks::WorldCamera_OnUpdate);
-    hookmgr->add_hook("UpdateFromNetAvatar", "32 21 00 00 66 39", sig::type::fstart, hooks::UpdateFromNetAvatar);
     hookmgr->add_hook("SendPacket", "02 00 00 00 e8 ? ? ? ? 90 48 8d 4c 24 50", sig::type::call, hooks::SendPacket, 4);
     hookmgr->add_hook("ProcessTankUpdatePacket", "83 78 04 71 75 ? 49", sig::type::fstart, hooks::ProcessTankUpdatePacket);
     hookmgr->add_hook("CanSeeGhosts", "04 00 00 00 e8 ? ? ? ? 8b c8 e8", sig::type::call, hooks::CanSeeGhosts, 11);
     hookmgr->add_hook("NetAvatar::Gravity", "B9 CA 27 00 00", sig::type::fstart, hooks::NetAvatar_Gravity);
     hookmgr->add_hook("NetHTTP::Update", "05 4D 01 00 00 89 ?? ?? 00", sig::type::fstart, hooks::NetHTTP_Update);
     hookmgr->add_hook("NetAvatar::ProcessAcceleration", "83 78 04 3c", sig::type::fstart, hooks::ProcessAcceleration);
+    hookmgr->add_hook("App::Update", "00 E8 ? ? ? ? C6 ?? ? ? 00 00 01 B9 ? ? 00 00", sig::type::fstart, hooks::App_Update);
 
     size_t invalid = 0;
     for (auto sig : database) {
