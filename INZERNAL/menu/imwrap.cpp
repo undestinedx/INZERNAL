@@ -1,4 +1,20 @@
+#pragma once
 #include "imwrap.h"
+#include <core/utils.h>
+#include <sdk/Consts.h>
+
+void imwrap::const_slider(const char* name, float min, float max, const char* format, int index, const char* tooltip) {
+    if (ImGui::Button(utils::format("Reset###re%d", index).c_str())) {
+        consts::values[index] = consts::defs[index];
+        consts::set_float(index, consts::defs[index]);
+    }
+    ImGui::SameLine();
+    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);
+    if (ImGui::SliderFloat(name, &consts::values[index], min, max, format))
+        consts::set_float(index, consts::values[index]);
+    ImGui::PopItemWidth();
+    imwrap::tooltip(tooltip);
+}
 
 void imwrap::tooltip(const char* tip) {
     if (tip) {

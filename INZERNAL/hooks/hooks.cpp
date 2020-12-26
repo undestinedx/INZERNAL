@@ -57,7 +57,9 @@ void hooks::init() {
     utils::printc("93", "Hooks have been setup!");
 }
 
-void hooks::destroy() {
+void hooks::destroy() {    
+    consts::reset_all(); //reset all consts
+
     SetWindowLongPtr(global::hwnd, -4, LONG_PTR(wndproc));
 RETRY:
     if (MH_OK != MH_DisableHook(MH_ALL_HOOKS)) {
@@ -118,22 +120,6 @@ LRESULT __stdcall hooks::WndProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lpara
         global::unload = true;
 
     return CallWindowProcW(hooks::wndproc, wnd, msg, wparam, lparam);
-}
-bool __cdecl hooks::CanPunchOrBuildNow(AvatarRenderData* render_data) {
-    //grr i wanted to get type of self func automatically but didnt find a way to do
-    static auto orig = decltype(&hooks::CanPunchOrBuildNow)(hookmgr->orig(sig::canpunchorbuildnow));
-    if (opt::cheat::punch_cooldown_on) {
-        static auto time_before = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed_sec = std::chrono::system_clock::now() - time_before;
-        if (elapsed_sec.count() > opt::cheat::punch_cooldown_val) {
-            time_before = std::chrono::system_clock::now();
-            return true;
-        }
-        else
-            return false;
-    }
-
-    return orig(render_data);
 }
 
 void __cdecl hooks::SendPacketRaw(int type, GameUpdatePacket* packet, int size, void* packetsender, ENetPeer* peer, int flag) {

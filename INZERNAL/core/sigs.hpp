@@ -11,7 +11,6 @@ namespace sig {
         baseapp_setfpslimit,
         logmsg,
         canmessaget4,
-        canpunchorbuildnow,
         sendpacketraw,
         handletouch,
         worldcamera_onupdate,

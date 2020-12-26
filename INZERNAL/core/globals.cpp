@@ -40,7 +40,7 @@ namespace opt {
 		bool	block_sendpacketraw	= false;	//	blocks any and all sendpacketraw requests. Acts as full ghost.
 		bool	antighost			= true;		//	ignores ghost effect.
 		
-		bool	punch_cooldown_on	= true;		//	custom punch & place cooldown (i.e fast punch)
+		bool	punch_cooldown_on	= true;		//	custom punch cooldown (i.e fast punch)
 		float	punch_cooldown_val	= 0.15f;
 		
 		bool	gravity_on			= false;	//	custom gravity

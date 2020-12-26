@@ -16,7 +16,7 @@ struct InputTextCallback_UserData {
 
 namespace imwrap {
 
-
+    void const_slider(const char* name, float min, float max, const char* format, int index, const char* tooltip = nullptr);
     void tooltip(const char* tip = nullptr);
     bool inputstring(const char* label, std::string* str, ImGuiInputTextFlags flags = 0, const char* tip = nullptr);
 

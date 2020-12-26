@@ -2,6 +2,7 @@
 #include <core/globals.h>
 #include <core/gt.h>
 #include <hooks/hooks.h>
+#include <sdk/Consts.h>
 
 class UpdateHook {
    public:
@@ -13,13 +14,14 @@ class UpdateHook {
         global::app = app;
         utils::unprotect_process();
 
-        auto gamelogic = sdk::GetGameLogic();
+        consts::set_defaults();
+
+        if (opt::cheat::punch_cooldown_on)
+            consts::set_float(C_PUNCH_RELOAD_TIME, opt::cheat::punch_cooldown_val);
+
+         auto gamelogic = sdk::GetGameLogic();
         if (!gamelogic)
             return;
-
-        if (opt::cheat::punch_cooldown_on) {
-        //   opt::cheat::punch_cooldown_val)
-        }
         auto player = gamelogic->GetLocalPlayer();
         if (!player)
             return;
@@ -28,7 +30,6 @@ class UpdateHook {
     }
 
     static void OnUpdateInWorld(App* app, NetAvatar* local) {
-
     }
     //any kind of continuous code can be ran here
     static void Execute(App* app) {

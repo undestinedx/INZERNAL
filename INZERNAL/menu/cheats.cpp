@@ -1,6 +1,20 @@
 #pragma once
 #include <menu/menu.h>
 #include <sdk/sdk.h>
+#include <sdk/Consts.h>
+
+//void imwrap::const_slider(const char* name, float min, float max, const char* format, int index, const char* tooltip = nullptr) {
+//    if (ImGui::Button(utils::format("Reset###re%d", index).c_str())) {
+//        consts::values[index] = consts::defs[index];
+//        consts::set_float(index, consts::defs[index]);
+//    }
+//    ImGui::SameLine();
+//    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);
+//    if (ImGui::SliderFloat(name, &consts::values[index], min, max, format))
+//        consts::set_float(index, consts::values[index]);
+//    ImGui::PopItemWidth();
+//    imwrap::tooltip(tooltip);
+//}
 
 void menu::cheats_tab() {
     auto local = sdk::GetGameLogic()->GetLocalPlayer();
@@ -23,61 +37,58 @@ void menu::cheats_tab() {
         func(local, (char*)&flags);
     }
 
-    printf("%f\n", * (float*)((uintptr_t)global::app + 3604));
-    static float speed = 400.0f;
-    if (ImGui::SliderFloat("Max fall speed", &speed, 0.f, 3000.0f)) {  
-        EncryptedFloat* ptr = (EncryptedFloat*)((uintptr_t)global::gt + 0x6854A8);
-        float total = 0.0f;
-        float delta = speed - ptr->get();
-        ptr->set(speed);
-        *(float*)((uintptr_t)global::app + 3604) += delta;
+    if (ImGui::CollapsingHeader("Game constants")) {
+        if (ImGui::BeginChild("###Constants", AUTOSIZE(10), true)) {
+            int i = 0;
+            if (ImGui::Button("Reset all")) {
+
+                 consts::reset_all();
+
+                if (opt::cheat::punch_cooldown_on) //dont reset this if we have the other option on for this
+                     consts::set_float(C_PUNCH_RELOAD_TIME, opt::cheat::punch_cooldown_val);
+            }
+               
+            imwrap::const_slider("Max falling speed", 0.f, 2000.f, "%.0f", i++, "Pretty simple");
+            imwrap::const_slider("Float power", 0.f, 10000.f, "%.0f", i++, "Higher makes damage flying curve smaller");
+            imwrap::const_slider("Wind speed", 0.f, 2000.0f, "%.0f", i++, "The speed winter wind and others push you");
+            imwrap::const_slider("Wind speed (against)", 0.f, 200.0f, "%.0f", i++, "The resistance of going against winter wind");
+            imwrap::const_slider("Collision max divergence", 0.f, 128.0f, "%.0f", i++, "No clue what this does, no references, no effect");
+            imwrap::const_slider("Player drag", -500.f, 2400.0f, "%.0f", i++, "Drag for walking. Low values allow 'moonwalk'.");
+            imwrap::const_slider("Initial jump boost", -100.f, -1000.0f, "%.0f", i++, "Affects how high you can jump in a different way from gravity");
+            imwrap::const_slider(
+                "Control mod (when hurt)", 0.0f, 1.5f, "%0.2f", i++, "Affects how well you are able to control your char when hurt. 1 = normal, 0 = no control.");
+            imwrap::const_slider("Lava bounce [x]", -100.f, 1000.0f, "%.0f", i++, "Just how much you bounce from lava/etc horizontally");
+            imwrap::const_slider("Lava bounce [y]", -100.f, 1400.0f, "%.0f", i++, "Just how much you bounce from lava/etc vertically");
+            imwrap::const_slider("Trampoline bounce", -100.f, 1600.0f, "%.0f", i++, "Bounciness for mushroom/etc");
+            imwrap::const_slider("Regular bounce", -100.f, 1600.0f, "%.0f", i++, "Bounciness for pinballs/etc");
+            imwrap::const_slider("Default punch knockback", -500.f, 500.0f, "%.0f", i++, "Does not seem to have much effect except for anims (clientside)");
+            imwrap::const_slider("Parasol gravity mod", 0.f, 1.0f, "%0.2f", i++, "How much parasol and similar affect gravity");
+            imwrap::const_slider("Water gravity mod", 0.f, 2.0f, "%0.2f", i++, "How much water affects gravity");
+            imwrap::const_slider("Mars gravity mod", 0.f, 2.0f, "%0.2f", i++, "How much mars affects gravity");
+            imwrap::const_slider("Engine speedhack", 0.f, 4000.0f, "%.0f", i++, "Game engine speedhack. Affects various things, some need re-enter to apply fully.");
+            imwrap::const_slider("Ghost speed", 0.f, 1000.0f, "%.0f", i++, "When you have the /ghost playmod, not related to ghosts that slime you.");
+            imwrap::const_slider(
+                "Water levitation time", 0.f, 6000.0f, "%.0f", i++, "Probably the time that the clothes that keep you floating on water have any effect. Didn't test.");
+            imwrap::const_slider("Punch cooldown", 0.f, 0.4f, "%0.2f", i++, "Changes punch cooldown, fast punch when small value");
+            imwrap::const_slider("Hack report delay (ms)", 100.f, 30000.0f, "%.0f", i++, "For example cheat engine open report, etc. Shouldn't have much of any use");
+        }
+        ImGui::EndChild();
     }
-    static float control = 0.15f;
-    if (ImGui::SliderFloat("Control mod when hurt", &control, 0.f, 2.f)) {
-        EncryptedFloat* ptr = (EncryptedFloat*)((uintptr_t)global::gt + 0x685518);
-        float total = 0.0f;
-        float delta = control - ptr->get();
-        ptr->set(control);
-        *(float*)((uintptr_t)global::app + 3604) += delta;
-    }
-    static float bounce = 300.0f;
-    if (ImGui::SliderFloat("Lava bounce X", &bounce, 0.f, 1000.0f)) {
-        EncryptedFloat* ptr = (EncryptedFloat*)((uintptr_t)global::gt + 0x685528);
-        float total = 0.0f;
-        float delta = bounce - ptr->get();
-        ptr->set(bounce);
-        *(float*)((uintptr_t)global::app + 3604) += delta;
-    }
-    static float thousand = 1000.0f;
-    if (ImGui::SliderFloat("Physics speed", &thousand, 0.f, 3000.0f)) {
-        EncryptedFloat* ptr = (EncryptedFloat*)((uintptr_t)global::gt + 0x6855A8);
-        float total = 0.0f;
-        float delta = thousand - ptr->get();
-        ptr->set(thousand);
-      //  *(float*)((uintptr_t)global::app + 3604) += delta;
-    }
-    static float watertime = 3000.0f;
-    if (ImGui::SliderFloat("Water levitation time", &watertime, 0.f, 5000.f)) {
-        EncryptedFloat* ptr = (EncryptedFloat*)((uintptr_t)global::gt + 0x6855C8);
-        float total = 0.0f;
-        float delta = watertime - ptr->get();
-        ptr->set(watertime);
-        //  *(float*)((uintptr_t)global::app + 3604) += delta;
-    }
-    static float punch = 0.2f;
-    if (ImGui::SliderFloat("Punch reload time", &punch, 0.f, 2.f)) {
-        EncryptedFloat* ptr = (EncryptedFloat*)((uintptr_t)global::gt + 0x6855D8);
-        float total = 0.0f;
-        float delta = punch - ptr->get();
-        ptr->set(punch);
-        //  *(float*)((uintptr_t)global::app + 3604) += delta;
-    }
-    if (ImGui::CollapsingHeader("Punch/build cooldown changer")) {
-        if (ImGui::BeginChild("###cooldownchanger", ImVec2(ImGui::GetWindowWidth() * 0.93f, 60.f), true)) {
-            ImGui::Checkbox("Enabled###punch", &opt::cheat::punch_cooldown_on);
+
+    if (ImGui::CollapsingHeader("Punch cooldown changer")) {
+        static int ix = C_PUNCH_RELOAD_TIME;
+        if (ImGui::BeginChild("###cooldownchanger", AUTOSIZE(2), true)) {
+            if (ImGui::Checkbox("Enabled###punch", &opt::cheat::punch_cooldown_on)) {
+                if (!opt::cheat::punch_cooldown_on)
+                    consts::set_float(ix, consts::defs[ix]);
+                else
+                    consts::set_float(ix, opt::cheat::punch_cooldown_val);
+            }
             ImGui::SameLine();
-            ImGui::SliderFloat("####pcoold", &opt::cheat::punch_cooldown_val, 0.05f, 0.4f, "%0.2f");
-            ImGui::Text("Shouldn't ban but low values will disconnect.");
+            if (ImGui::SliderFloat("###punchc", &opt::cheat::punch_cooldown_val, 0.0f, 0.4f, "%0.2f") && opt::cheat::punch_cooldown_on) {
+                consts::set_float(ix, opt::cheat::punch_cooldown_val);
+            }
+            ImGui::Text("Does the same thing as the const slider for punch cooldown, just left this as a changer too.");
             ImGui::EndChild();
         }
     }

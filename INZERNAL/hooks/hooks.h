@@ -64,7 +64,6 @@ namespace hooks {
 	void	__cdecl		BaseApp_SetFPSLimit(BaseApp* ba, float fps);
 	int		__cdecl		LogMsg(const char* msg, ...);
 	bool	__cdecl		NetAvatar_CanMessageT4(NetAvatar* player);
-	bool	__cdecl		CanPunchOrBuildNow(AvatarRenderData* render_data);
 	void	__cdecl		SendPacketRaw(int type, GameUpdatePacket* packet, int size, void* packetsender, ENetPeer* peer, int flag);
 	void	__cdecl		HandleTouch(LevelTouchComponent* touch, CL_Vec2f pos, bool started);
     void    __cdecl     WorldCamera_OnUpdate(WorldCamera* camera, CL_Vec2f unk, CL_Vec2f unk2);

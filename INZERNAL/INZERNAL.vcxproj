@@ -68,6 +68,7 @@
     <ClCompile Include="proton\PlatformPrecomp.cpp" />
     <ClCompile Include="proton\Variant.cpp" />
     <ClCompile Include="proton\VariantDB.cpp" />
+    <ClCompile Include="sdk\Consts.cpp" />
     <ClCompile Include="sdk\sdk.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -140,6 +141,7 @@
     <ClInclude Include="proton\variant2.hpp" />
     <ClInclude Include="proton\VariantDB.h" />
     <ClInclude Include="proton\vector2.hpp" />
+    <ClInclude Include="sdk\Consts.h" />
     <ClInclude Include="sdk\player\AvatarRenderData.h" />
     <ClInclude Include="sdk\ENetClient.hpp" />
     <ClInclude Include="sdk\EntityComponent.h" />
