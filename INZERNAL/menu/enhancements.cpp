@@ -25,25 +25,18 @@ void menu::enhancements_tab() {
     }
 
     ImGui::Columns(3);
-
-    ImGui::Checkbox("Block sendpacketraw", &opt::cheat::block_sendpacketraw);
-    ImGui::Checkbox("Antighost", &opt::cheat::antighost);
-    ImGui::Checkbox("See ghosts", &opt::see_ghosts);
+    imwrap::checkbox("See ghosts", opt::see_ghosts, "Allows you to see ghosts as the name says");
 
     ImGui::NextColumn();
 
-    ImGui::Checkbox("Mod zoom", &opt::mod_zoom);
-    ImGui::Checkbox("Dev zoom", &opt::cheat::dev_zoom);
-    ImGui::Checkbox("TP on click (CTRL)", &opt::tp_click);
-
+    imwrap::checkbox("Mod zoom", opt::mod_zoom, "Allows you to zoom as far out as you want to, like mods");
+    
   //TODO: clean up enhancements and cheats, sort them out and add missing options
 
     ImGui::NextColumn();
 
-    ImGui::Checkbox("Spoof login info", &opt::spoof_login);
-    //if (imwrap::checkbox("Use Alt Server", opt::alt_server, "Always uses the alternative server, which fixes the issues of freezing upon logon")) {
-    //    *(bool*)((uintptr_t)global::gt + 0x5EA071) = opt::alt_server; //very ghetto, but theres no way to sig this
-    //}
+    imwrap::checkbox("TP on click", opt::tp_click, "Teleports to cursor position when you press ctrl + left click");
+
     ImGui::EndColumns();
 
 }

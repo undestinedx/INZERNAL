@@ -36,7 +36,11 @@ void menu::cheats_tab() {
         static auto func = fuck((uintptr_t)global::gt + 0x3978F0);
         func(local, (char*)&flags);
     }
-
+    imwrap::checkbox("Block Sendpacketraw", opt::cheat::block_sendpacketraw, "Basically full-on ghost, but a bit more crude than actual ghost.");
+   
+    imwrap::checkbox("Dev zoom", opt::cheat::dev_zoom, "Same as mod zoom but allows you to place and build far away too.\nWhich can ban btw.");
+    imwrap::checkbox("Antighost", opt::cheat::antighost, "Ignores ghost slimed effect. Best used alongside with see ghosts enhancement.");
+    
     if (ImGui::CollapsingHeader("Game constants")) {
         if (ImGui::BeginChild("###Constants", AUTOSIZE(10), true)) {
             int i = 0;

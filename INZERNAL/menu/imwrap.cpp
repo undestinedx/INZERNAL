@@ -3,6 +3,22 @@
 #include <core/utils.h>
 #include <sdk/Consts.h>
 
+
+//just ported from old csgo cheat, probably also taken from elsewhere partially
+bool imwrap::combo(const char* label, int* currIndex, std::vector<std::string>& values) {
+    if (values.empty())
+        return false;
+
+    return ImGui::Combo(label, currIndex, vector_getter, static_cast<void*>(&values), values.size());
+}
+
+bool imwrap::listbox(const char* label, int* currIndex, std::vector<std::string>& values, int height_in_items) {
+    if (values.empty())
+        return false;
+
+    return ImGui::ListBox(label, currIndex, vector_getter, static_cast<void*>(&values), values.size(), height_in_items);
+}
+
 void imwrap::const_slider(const char* name, float min, float max, const char* format, int index, const char* tooltip) {
     if (ImGui::Button(utils::format("Reset###re%d", index).c_str())) {
         consts::values[index] = consts::defs[index];

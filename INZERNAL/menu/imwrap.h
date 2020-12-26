@@ -16,6 +16,17 @@ struct InputTextCallback_UserData {
 
 namespace imwrap {
 
+    static auto vector_getter = [](void* vec, int idx, const char** out_text) {
+        auto& vector = *static_cast<std::vector<std::string>*>(vec);
+        if (idx < 0 || idx >= static_cast<int>(vector.size())) {
+            return false;
+        }
+        *out_text = vector.at(idx).c_str();
+        return true;
+    };
+
+    bool combo(const char* label, int* currIndex, std::vector<std::string>& values);
+    bool listbox(const char* label, int* currIndex, std::vector<std::string>& values, int height_in_items = -1);
     void const_slider(const char* name, float min, float max, const char* format, int index, const char* tooltip = nullptr);
     void tooltip(const char* tip = nullptr);
     bool inputstring(const char* label, std::string* str, ImGuiInputTextFlags flags = 0, const char* tip = nullptr);
