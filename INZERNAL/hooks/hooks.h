@@ -70,8 +70,6 @@ namespace hooks {
     void    __cdecl     SendPacket(int type, std::string& packet, ENetPeer* peer);
     void    __cdecl     ProcessTankUpdatePacket(GameLogic* logic, GameUpdatePacket* packet);
     bool    __cdecl     CanSeeGhosts(int id);
-    void    __cdecl     NetAvatar_Gravity(NetAvatar* player);
-    void    __cdecl     ProcessAcceleration(NetAvatar* player, float speed);
     void    __cdecl     NetHTTP_Update(NetHTTP* http);
     long    __stdcall   EndScene(IDirect3DDevice9* device);
     void    __cdecl     App_Update(App* app);

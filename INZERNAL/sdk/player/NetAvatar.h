@@ -67,7 +67,7 @@ GTClass NetAvatar { //how fucking annoying it is to get align to work
     uint32_t tile_x;
     uint32_t tile_y;
     char unk02[12];
-    EncryptedFloat velocity_x;
+    EncryptedFloat velocity_x; //could be fun to do all kinds of things with messing with these values
     EncryptedFloat velocity_y;
     char unk6[8];
     int emotion;

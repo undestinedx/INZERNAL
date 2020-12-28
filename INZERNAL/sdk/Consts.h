@@ -45,7 +45,7 @@ namespace consts {
 
     extern float* values;
     extern float* defs;
-   
+
     void reset_all();
     void set_defaults();
     void set_float(int index, float val);

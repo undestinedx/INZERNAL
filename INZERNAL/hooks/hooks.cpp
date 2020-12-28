@@ -55,8 +55,7 @@ void hooks::init() {
 }
 
 void hooks::destroy() {    
-    consts::reset_all(); //reset all consts
-
+    UpdateManager::OnDestroy(); 
     SetWindowLongPtr(global::hwnd, -4, LONG_PTR(wndproc));
 RETRY:
     if (MH_OK != MH_DisableHook(MH_ALL_HOOKS)) {
@@ -128,7 +127,7 @@ void __cdecl hooks::HandleTouch(LevelTouchComponent* touch, CL_Vec2f pos, bool s
 
     //TODO: WorldCamera::WorldToScreen to check if pos is within imgui menu when global::draw 
 
-    if (opt::tp_click && GetAsyncKeyState(VK_CONTROL)) {
+    if (opt::cheat::tp_click && GetAsyncKeyState(VK_CONTROL)) {
         //localplayer is guaranteed to be a valid pointer here according to xrefs
         auto local = sdk::GetGameLogic()->GetLocalPlayer();
         auto new_pos = pos - (local->GetSize() / 2.f);
@@ -141,7 +140,7 @@ void __cdecl hooks::HandleTouch(LevelTouchComponent* touch, CL_Vec2f pos, bool s
 
 void __cdecl hooks::WorldCamera_OnUpdate(WorldCamera* camera, CL_Vec2f unk, CL_Vec2f unk2) {
     static auto orig = decltype(&hooks::WorldCamera_OnUpdate)(hookmgr->orig(sig::worldcamera_onupdate));
-    if (opt::tp_click && GetAsyncKeyState(VK_CONTROL)) //if we dont do this then there is major sliding when teleporting.
+    if (opt::cheat::tp_click && GetAsyncKeyState(VK_CONTROL)) //if we dont do this then there is major sliding when teleporting.
         return;
 
     orig(camera, unk, unk2);
@@ -157,38 +156,9 @@ void __cdecl hooks::ProcessTankUpdatePacket(GameLogic* logic, GameUpdatePacket* 
 
 bool __cdecl hooks::CanSeeGhosts(int id) {
     static auto orig = decltype(&hooks::CanSeeGhosts)(hookmgr->orig(sig::canseeghosts));
-    if (opt::see_ghosts)
+    if (opt::cheat::see_ghosts)
         return true;
     return orig(id);
-}
-
-void __cdecl hooks::NetAvatar_Gravity(NetAvatar* player) {
-    static auto orig = decltype(&hooks::NetAvatar_Gravity)(hookmgr->orig(sig::gravity));
-    if (opt::cheat::gravity_on && player == sdk::GetGameLogic()->GetLocalPlayer()) {
-        auto backup = player->gravity.get();
-        player->gravity.set(opt::cheat::gravity_val);
-        orig(player);
-        player->gravity.set(backup);
-    }
-    else
-        orig(player);
-}
-
-void __cdecl hooks::ProcessAcceleration(NetAvatar* player, float speed) {
-    static auto orig = decltype(&hooks::ProcessAcceleration)(hookmgr->orig(sig::processacceleration));
-    orig(player, speed);
-
-    if (player == sdk::GetGameLogic()->GetLocalPlayer()) {
-        if (opt::cheat::movespeed_on) {
-            if (speed != 0.f) {
-                if ((opt::cheat::movespeed_start || (!opt::cheat::movespeed_start && fabsf(player->velocity_x.get()) >= 250.f))) {
-                    player->velocity_x.set(speed > 0.f ? opt::cheat::movespeed_val : -opt::cheat::movespeed_val);
-                }
-            }
-            else if (opt::cheat::movespeed_stop)
-                player->velocity_x.set(0.f);
-        }
-    }
 }
 
 void __cdecl hooks::NetHTTP_Update(NetHTTP* http) {
@@ -213,5 +183,5 @@ long __stdcall hooks::EndScene(IDirect3DDevice9* device) {
 
 //ideal hook for all kinds of continuous loops and also conveniently gets us app
 void __cdecl hooks::App_Update(App* app) {
-    UpdateHook::Execute(app);
+    UpdateManager::Execute(app);
 }

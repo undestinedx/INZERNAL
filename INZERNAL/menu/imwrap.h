@@ -12,9 +12,25 @@ struct InputTextCallback_UserData {
 
 #define BLOCK_SIZE 30.0f
 #define AUTOSIZE(x) ImVec2(ImGui::GetWindowWidth() * 0.93f, BLOCK_SIZE * x)
-
+#define AUTOSIZEC(x) ImVec2(ImGui::GetColumnWidth() - 10.f, BLOCK_SIZE * x)
+#define RGBA(r, g, b, a) (((unsigned char)(a)) + ((unsigned char)(r) << 8) + ((unsigned char)(g) << 16) + ((unsigned char)(b) << 24))
 
 namespace imwrap {
+
+    //from private internal, might be used later on, so bringing it for now
+    namespace col {
+        struct im {
+            float red;
+            float green;
+            float blue;
+            float alpha;
+        };
+
+        //GT argb
+        int im_to_gt(im& c);
+        im gt_to_im(int gt);
+    } 
+
 
     static auto vector_getter = [](void* vec, int idx, const char** out_text) {
         auto& vector = *static_cast<std::vector<std::string>*>(vec);
@@ -30,6 +46,9 @@ namespace imwrap {
     void const_slider(const char* name, float min, float max, const char* format, int index, const char* tooltip = nullptr);
     void tooltip(const char* tip = nullptr);
     bool inputstring(const char* label, std::string* str, ImGuiInputTextFlags flags = 0, const char* tip = nullptr);
+    bool fchanger(const char* label, float& variable, bool& toggle, float min, float max);
+
+    void prep_columns(int count);
 
      template <size_t N>
     void horizontal_tabs(char* (&names)[N], int& activetab, float w, float h) {

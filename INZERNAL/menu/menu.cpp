@@ -17,7 +17,6 @@ void menu::animate() {
     }
 }
 
-
 void menu::EndScene(IDirect3DDevice9* device, bool active) {
     if (!global::load) { //init imgui
         IMGUI_CHECKVERSION();
@@ -25,7 +24,7 @@ void menu::EndScene(IDirect3DDevice9* device, bool active) {
         ImGuiIO& io = ImGui::GetIO();
         ImGui_ImplDX9_Init(device);
         ImGui::StyleColorsDark();
-        //load_config(); 
+        //load_config();
         utils::printc("93", "dx9 and imgui init done");
         global::load = true;
     }
@@ -35,10 +34,9 @@ void menu::EndScene(IDirect3DDevice9* device, bool active) {
         ImGui::NewFrame();
 
         ImGui::SetNextWindowPos(ImVec2{ 0, 0 }, ImGuiCond_Once);
-        ImGui::SetNextWindowSize(ImVec2{ 800, 400 }, ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2{ 800, 500 }, ImGuiCond_Once);
 
         if (global::draw && ImGui::Begin(std::string("INZERNAL " + global::version).c_str(), &global::draw, ImGuiWindowFlags_NoCollapse)) {
-          
             animate();
             static char* tab_names[] = { (char*)"Enhancements", (char*)"Cheats", (char*)"Framework" };
             static int active_tab = 0;
@@ -48,10 +46,8 @@ void menu::EndScene(IDirect3DDevice9* device, bool active) {
 
             float group_w = ImGui::GetCurrentWindow()->Size.x - style.WindowPadding.x * 2;
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 10));
-           // {
-                ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.f);
-                imwrap::horizontal_tabs(tab_names, active_tab, group_w / _countof(tab_names), 33.0f);
-          //  }
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.f);
+            imwrap::horizontal_tabs(tab_names, active_tab, group_w / _countof(tab_names), 33.0f);
             ImGui::PopStyleVar(3);
 
             switch (active_tab) {

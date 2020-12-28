@@ -2902,10 +2902,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
     }
 
     // Draw frame
-    ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
-    if (g.HoveredId == id || g.ActiveId == id)
-        frame_col += GetColorU32(ImVec4(0.f, 0.f, 0.f, global::fade));
-
+    const ImU32 frame_col = GetColorU32(g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
     RenderNavHighlight(frame_bb, id);
     RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
 
@@ -2918,37 +2915,32 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
     //Custom slider design
     ImRect bb_slider(ImVec2(grab_bb.Min.x - frame_bb.GetWidth() + frame_bb.GetHeight() * 0.5f, frame_bb.Min.y), ImVec2(grab_bb.Max.x, grab_bb.Max.y));
     PushClipRect(frame_bb.Min + ImVec2(2, 2), ImVec2(grab_bb.Min.x, grab_bb.Max.y + 1), true);
-    static const auto top = GetColorU32(ImVec4::FromRGBA(158, 180, 229, 255));
-    static const auto bottom = GetColorU32(ImVec4::FromRGBA(16, 67, 178, 255));
-    bool active = g.ActiveId == id || hovered;
-    auto modt = ImU32(0);
-    auto modb = ImU32(0);
-    if (active) {
-        modt = GetColorU32(ImVec4(global::fade / 2.0f, global::fade / 2.0f, global::fade / 4.0f, -global::fade)); //no im not going to explain these values
-        modb = GetColorU32(ImVec4(global::fade / 3.0f, global::fade / 3.0f, global::fade / 2.5f, -global::fade / 3.f));
-    }
-    if (active)
-        window->DrawList->AddRectFilledMultiColor(bb_slider.Min, bb_slider.Max, top + modt, top + modt, bottom + modb, bottom + modb);
-    else
-        window->DrawList->AddRectFilledMultiColor(bb_slider.Min, bb_slider.Max, top, top, bottom, bottom);
 
+    const bool text_left = (flags & ImGuiSliderFlags_TextPositionLeft);
+    bool active = g.ActiveId == id || hovered;
+    auto col_slider = GetColorU32(active ? ImGuiCol_ButtonHovered : ImGuiCol_SliderGrabActive);
+    if (active)
+        col_slider -= GetColorU32(ImVec4(0.f, 0.f, 0.f, global::fade * 1.5f));
+    window->DrawList->AddRectFilled(bb_slider.Min, bb_slider.Max, col_slider);
     PopClipRect();
-    if (grab_bb.GetWidth() > 30.f) {
-        //window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
-    }
+
     if (grab_bb.Max.x > grab_bb.Min.x) {
         window->DrawList->AddRect(grab_bb.Min - ImVec2(2, 3), grab_bb.Max + ImVec2(2, 3), GetColorU32(ImVec4(0, 0, 0, 1)), style.GrabRounding);
 
+        auto col_grab = GetColorU32(active ? ImGuiCol_ButtonActive : ImGuiCol_SliderGrab);
         if (active)
-            window->DrawList->AddRectFilledMultiColor(grab_bb.Min - ImVec2(1, 2), grab_bb.Max + ImVec2(1, 2), top + modt, top + modt, bottom + modb, bottom + modb);
-        else
-            window->DrawList->AddRectFilledMultiColor(grab_bb.Min - ImVec2(1, 2), grab_bb.Max + ImVec2(1, 2), top, top, bottom, bottom);
+            col_grab -= GetColorU32(ImVec4(0.f, 0.f, 0.f, global::fade));
+
+        window->DrawList->AddRectFilled(grab_bb.Min - ImVec2(1, 2), grab_bb.Max + ImVec2(1, 2), col_grab);
     }
 
     // Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
     char value_buf[64];
     const char* value_buf_end = value_buf + DataTypeFormatString(value_buf, IM_ARRAYSIZE(value_buf), data_type, p_data, format);
-    RenderTextClipped(frame_bb.Min, frame_bb.Max, value_buf, value_buf_end, NULL, ImVec2(0.5f, 0.5f));
+
+    //custom label pos added by me -ama
+    const ImVec2 label_pos = ImVec2(text_left ? 0.05f : 0.5f, 0.5f);
+    RenderTextClipped(frame_bb.Min, frame_bb.Max, value_buf, value_buf_end, NULL, label_pos);
 
     if (label_size.x > 0.0f)
         RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);

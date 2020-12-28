@@ -3,21 +3,14 @@
 #include <sdk/sdk.h>
 
 void menu::framework_tab() {
-    auto& style = ImGui::GetStyle();
-    //setup columns and some style
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ style.WindowPadding.x, style.ItemSpacing.y });
-    ImGui::Columns(3, nullptr, true);
-    float group_w = ImGui::GetCurrentWindow()->Size.x - style.WindowPadding.x * 2;
-    ImGui::SetColumnOffset(1, group_w / 3.0f);
-    ImGui::SetColumnOffset(2, 2 * group_w / 3.0f);
-    ImGui::SetColumnOffset(3, 3 * group_w / 3.0f);
+    imwrap::prep_columns(3);
 
     auto client = sdk::GetClient();
     auto logic = sdk::GetGameLogic();
     auto local = logic->GetLocalPlayer();
     auto world = logic->GetWorld();
     auto tilemap = logic->GetTileMap();
-    bool local_div = ImGui::BeginChild("Player", ImVec2(ImGui::GetWindowWidth() / 3.1f, 250.f), true, ImGuiWindowFlags_MenuBar);
+    bool local_div = ImGui::BeginChild("Player", ImVec2(ImGui::GetWindowWidth() / 3.15f, 250.f), true, ImGuiWindowFlags_MenuBar);
     if (local_div && local) {
         ImGui::BeginMenuBar();
         ImGui::Text("Player");
@@ -56,7 +49,7 @@ void menu::framework_tab() {
 
     ImGui::NextColumn();
 
-    bool world_div = ImGui::BeginChild("World", ImVec2(ImGui::GetWindowWidth() / 3.1f, 250.f), true, ImGuiWindowFlags_MenuBar);
+    bool world_div = ImGui::BeginChild("World", ImVec2(ImGui::GetWindowWidth() / 3.15f, 250.f), true, ImGuiWindowFlags_MenuBar);
     if (world_div && world) {
         ImGui::BeginMenuBar();
         ImGui::Text("World");

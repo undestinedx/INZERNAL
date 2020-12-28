@@ -17,9 +17,7 @@ namespace sig {
         sendpacket,
         processtankupdatepacket,
         canseeghosts,
-        gravity,
         nethttp_update,
-        processacceleration,
         app_update
     };
 

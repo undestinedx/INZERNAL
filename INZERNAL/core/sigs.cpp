@@ -48,9 +48,7 @@ void sigs::init() {
     hookmgr->add_hook("SendPacket", "02 00 00 00 e8 ? ? ? ? 90 48 8d 4c 24 50", sig::type::call, hooks::SendPacket, 4);
     hookmgr->add_hook("ProcessTankUpdatePacket", "83 78 04 71 75 ? 49", sig::type::fstart, hooks::ProcessTankUpdatePacket);
     hookmgr->add_hook("CanSeeGhosts", "04 00 00 00 e8 ? ? ? ? 8b c8 e8", sig::type::call, hooks::CanSeeGhosts, 11);
-    hookmgr->add_hook("NetAvatar::Gravity", "B9 CA 27 00 00", sig::type::fstart, hooks::NetAvatar_Gravity);
     hookmgr->add_hook("NetHTTP::Update", "05 4D 01 00 00 89 ?? ?? 00", sig::type::fstart, hooks::NetHTTP_Update);
-    hookmgr->add_hook("NetAvatar::ProcessAcceleration", "83 78 04 3c", sig::type::fstart, hooks::ProcessAcceleration);
     hookmgr->add_hook("App::Update", "00 E8 ? ? ? ? C6 ?? ? ? 00 00 01 B9 ? ? 00 00", sig::type::fstart, hooks::App_Update);
 
     size_t invalid = 0;

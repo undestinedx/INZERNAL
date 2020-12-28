@@ -2,6 +2,7 @@
 #include <core/globals.h>
 #include <sdk/sdk.h>
 #include <string>
+#include <hooks/Update.h>
 
 class SendPacketRawHook {
    public:
@@ -22,7 +23,7 @@ class SendPacketRawHook {
         if (packet->type == 0 && packet->flags & 4) {
             auto player = sdk::GetGameLogic()->GetLocalPlayer();
             if (player)
-                player->SetModStatus(opt::mod_zoom, opt::cheat::dev_zoom);
+                UpdateManager::OnJoinedWorld(player);
         }
 
         if (packet->velocity_x == 1000.f || packet->type == PACKET_PING_REPLY) {

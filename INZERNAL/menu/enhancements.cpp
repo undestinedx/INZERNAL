@@ -24,19 +24,4 @@ void menu::enhancements_tab() {
         }
     }
 
-    ImGui::Columns(3);
-    imwrap::checkbox("See ghosts", opt::see_ghosts, "Allows you to see ghosts as the name says");
-
-    ImGui::NextColumn();
-
-    imwrap::checkbox("Mod zoom", opt::mod_zoom, "Allows you to zoom as far out as you want to, like mods");
-    
-  //TODO: clean up enhancements and cheats, sort them out and add missing options
-
-    ImGui::NextColumn();
-
-    imwrap::checkbox("TP on click", opt::tp_click, "Teleports to cursor position when you press ctrl + left click");
-
-    ImGui::EndColumns();
-
 }

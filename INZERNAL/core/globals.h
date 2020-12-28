@@ -10,12 +10,11 @@
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "shlwapi.lib")
-#include <enet/include/enet.h>
-
 #include <d3d9.h>
+#include <enet/include/enet.h>
+#include <proton/NetHTTP.h>
 #include <proton/Variant.h>
 #include <proton/clanlib/vec2.h>
-#include <proton/NetHTTP.h>
 #include <stdio.h>
 #include <atomic>
 #include <core/json.hpp>
@@ -66,21 +65,6 @@ enum FlagMode {
 	fmRandom = 1,	//pick random flag from gt folder
 	fmCustom = 2,	//use custom flag
 };
-//from private internal, might be used later on, so bringing it for now
-namespace col {
-	struct im {
-		float red;
-		float green;
-		float blue;
-		float alpha;
-	};
-
-	//GT argb
-#define RGBA(r,g,b,a)(((unsigned char)(a)) +  ((unsigned char)(r) << 8) + ((unsigned char)(g) << 16) + ((unsigned char)(b) << 24))
-
-	int im_to_gt(im& c);
-	im gt_to_im(int gt);
-}
 
 namespace logging {
 
@@ -102,9 +86,7 @@ namespace opt {
 	
 	extern std::string	gt_version;
 	extern float		fps_limit;
-	extern bool			tp_click;
-	extern bool			mod_zoom;
-	extern bool			see_ghosts;
+
 	extern bool			spoof_login;
 	extern bool			spoof_name;
 	extern WinSpoof		spoof_win;
@@ -115,23 +97,53 @@ namespace opt {
 	extern std::string	custom_server_val;
 
 	namespace cheat {
-		extern bool		punch_cooldown_on;
-		extern float	punch_cooldown_val;
 		extern bool		dev_zoom;
-		extern bool		gravity_on;
-		extern float	gravity_val;
 		extern bool		block_sendpacketraw;
 		extern bool		antighost;
-		extern bool		movespeed_on;
-		extern bool		movespeed_start;
-		extern bool		movespeed_stop;
-		extern float	movespeed_val;
-		extern bool		punchstr_on;
-		extern float	punchstr_val;
+		extern bool			tp_click;
+		extern bool			mod_zoom;
+		extern bool			see_ghosts;
+
+		extern bool		punch_cooldown_on;
+		extern float	punch_cooldown_val;
+
+		extern bool		gravity_on;
+		extern float	gravity_val;
+
+		extern bool		speed_on;
+		extern float	speed_val;
+
+		extern bool		accel_on;
+		extern float	accel_val;
+
+		extern bool		waterspeed_on;
+		extern float	waterspeed_val;
+
 	}
 	
 }
 
+struct charstate_t {
+    int punchid = 0;
+    int8_t buildrange = 0;
+    int8_t punchrange = 0;
+    int pupil_color;
+    int eye_color;
+    int eye_shade_color;
+    int eff_flags1 = 0;
+    int eff_flags2 = 0;
+    float gravity = 1000.0f; //just in case we inject mid world, change gravity, but never receive 
+    float speed = 250.f;
+    float accel = 1200.f;
+    float punch_strength = 300.f;
+    float water_speed  = 125.f;
+
+    void copy_from_packet(GameUpdatePacket* packet);
+
+	//yeah in the 0.1% chance that we inject mid world and quickly change gravity etc
+	//without ever receiving set state packet, then uninjecting, getting ping reply, and that would ban without copying info on inject.
+	void copy_inject(NetAvatar* player, bool is_local); 
+};
 namespace global {
 	extern HMODULE		self;
 	extern App*			app;
@@ -142,7 +154,9 @@ namespace global {
 	extern bool			draw;
 	extern std::string	version;
 	extern float		fade;
+	extern charstate_t	state;
 	//	extern nlohmann::json m_cfg;
 }
 
 // clang-format on
+

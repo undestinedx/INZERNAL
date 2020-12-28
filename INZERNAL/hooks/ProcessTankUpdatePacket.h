@@ -29,8 +29,9 @@ class ProcessTankUpdatePacketHook {
             case PACKET_SET_CHARACTER_STATE: {
                 if (!local)
                     break;
-                if (opt::cheat::antighost && packet->netid == local->netid) {
-                    if (packet->gravity_out > 1150.0f && packet->speed_out < 150.0f)
+                if (packet->netid == local->netid) {
+                    global::state.copy_from_packet(packet);
+                    if (opt::cheat::antighost && packet->gravity_out > 1150.0f && packet->speed_out < 150.0f)
                         return;
                 }
             } break;
