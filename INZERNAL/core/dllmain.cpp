@@ -5,9 +5,8 @@
 #include <core/utils.h>
 #include <hooks\hooks.h>
 #include <process.h>
-#include <core/sigs.hpp>
 #include <proton\MiscUtils.h>
-
+#include <core/sigs.hpp>
 
 bool unload_done = false;
 void on_exit() {
@@ -25,12 +24,16 @@ void on_exit() {
     unload_done = true;
     FreeLibraryAndExitThread(HMODULE(global::self), 1);
 }
-
 void on_inject() {
     MH_Initialize();
     utils::attach_console();
 
     SetConsoleTitleA("[INZERNAL]");
+
+    //TODO leaving stuff with this for V0.6
+    //uint32_t uint3 = (uint16_t)gt::get_cpuid() + 1;
+    //printf("Registry keys (testing): %d, %d\n", (uint3 >> 1), uint3);
+
     utils::printc("96", "INZERNAL - internal framework and enhancement suite");
     utils::printc("1;40;31", "\tspecial thanks to ness for patcher");
     utils::printc("92", "\tmade by ama - https://github.com/ama6nen/INZERNAL\n");
@@ -46,6 +49,7 @@ void on_inject() {
 
     while (!global::unload)
         Sleep(10);
+
     on_exit();
 }
 

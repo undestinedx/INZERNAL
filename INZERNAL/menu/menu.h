@@ -16,6 +16,7 @@ namespace menu {
     void enhancements_tab();
     void cheats_tab();
     void framework_tab();
+    void animate();
     void EndScene(IDirect3DDevice9* device, bool active);
     bool WndProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam);
 } // namespace menu

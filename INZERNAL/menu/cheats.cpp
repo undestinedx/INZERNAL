@@ -3,19 +3,6 @@
 #include <sdk/sdk.h>
 #include <sdk/Consts.h>
 
-//void imwrap::const_slider(const char* name, float min, float max, const char* format, int index, const char* tooltip = nullptr) {
-//    if (ImGui::Button(utils::format("Reset###re%d", index).c_str())) {
-//        consts::values[index] = consts::defs[index];
-//        consts::set_float(index, consts::defs[index]);
-//    }
-//    ImGui::SameLine();
-//    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);
-//    if (ImGui::SliderFloat(name, &consts::values[index], min, max, format))
-//        consts::set_float(index, consts::values[index]);
-//    ImGui::PopItemWidth();
-//    imwrap::tooltip(tooltip);
-//}
-
 void menu::cheats_tab() {
     auto local = sdk::GetGameLogic()->GetLocalPlayer();
 
@@ -36,9 +23,11 @@ void menu::cheats_tab() {
         static auto func = fuck((uintptr_t)global::gt + 0x3978F0);
         func(local, (char*)&flags);
     }
+
     imwrap::checkbox("Block Sendpacketraw", opt::cheat::block_sendpacketraw, "Basically full-on ghost, but a bit more crude than actual ghost.");
-   
+    ImGui::SameLine();
     imwrap::checkbox("Dev zoom", opt::cheat::dev_zoom, "Same as mod zoom but allows you to place and build far away too.\nWhich can ban btw.");
+    ImGui::SameLine();
     imwrap::checkbox("Antighost", opt::cheat::antighost, "Ignores ghost slimed effect. Best used alongside with see ghosts enhancement.");
     
     if (ImGui::CollapsingHeader("Game constants")) {

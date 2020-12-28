@@ -141,6 +141,7 @@ namespace global {
 	extern bool			load;
 	extern bool			draw;
 	extern std::string	version;
+	extern float		fade;
 	//	extern nlohmann::json m_cfg;
 }
 

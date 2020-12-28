@@ -67,6 +67,7 @@ namespace global {
 		bool		load	= false;	//	menu/imgui initialization status
 		bool		draw	= false;	//	menu draw status. set to true for menu to show up when you inject
 		std::string	version	= "V0.5";	//	INZERNAL version
+		float		fade = 0.f;			//	does not matter, will get automatically updated
 }
 
 // clang-format on

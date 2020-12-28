@@ -147,7 +147,7 @@ void menu::framework_tab() {
 
     ImGui::NextColumn();
 
-    bool client_div = ImGui::BeginChild("ENetClient", ImVec2(ImGui::GetWindowWidth() / 3.1f, 250.f), true, ImGuiWindowFlags_MenuBar);
+    bool client_div = ImGui::BeginChild("ENetClient", ImVec2(ImGui::GetWindowWidth() / 3.15f, 250.f), true, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar);
     if (client_div && client) {
         ImGui::BeginMenuBar();
         ImGui::Text("ENetClient");
@@ -162,10 +162,10 @@ void menu::framework_tab() {
         ImGui::Text("Token: %u", client->token);
         ImGui::Separator();
         ImGui::PushItemWidth(150.0f);
-        ImGui::InputInt("tracking_tick", &client->tracking_tick);
+        ImGui::InputInt("track_tick", &client->tracking_tick);
         ImGui::InputInt("conn_status", &client->conn_status);
-        ImGui::InputInt("another_timer", &client->another_timer);
-        ImGui::InputInt("connection_timer", &client->connection_timer);
+        ImGui::InputInt("unk_timer", &client->another_timer);
+        ImGui::InputInt("conn_timer", &client->connection_timer);
         ImGui::PopItemWidth();
         ImGui::EndChild();
     }
@@ -197,3 +197,4 @@ void menu::framework_tab() {
     ImGui::SameLine();
     ImGui::Text("GameLogic: %llx", logic);
 }
+

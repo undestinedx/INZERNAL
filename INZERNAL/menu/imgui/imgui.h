@@ -220,12 +220,37 @@ struct ImVec2
 #endif
 };
 
-// 4D vector (often used to store floating-point colors)
+
+struct ImVec3 {
+    float x, y, z;
+    ImVec3() {
+        x = y = z  = 0.0f;
+    }
+    ImVec3(float _x, float _y, float _z) {
+        x = _x;
+        y = _y;
+        z = _z;
+    }
+
+    
+};
+    // 4D vector (often used to store floating-point colors)
 struct ImVec4
 {
     float                                   x, y, z, w;
     ImVec4()                                { x = y = z = w = 0.0f; }
     ImVec4(float _x, float _y, float _z, float _w)  { x = _x; y = _y; z = _z; w = _w; }
+   
+    static ImVec4 FromRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+        ImVec4 vec = ImVec4();
+        vec.x = r / 255.0f;
+        vec.y = g / 255.0f;
+        vec.z = b / 255.0f;
+        vec.w = a / 255.0f;
+        return vec;
+    }
+
+
 #ifdef IM_VEC4_CLASS_EXTRA
     IM_VEC4_CLASS_EXTRA     // Define additional constructors and implicit cast operators in imconfig.h to convert back and forth between your math types and ImVec4.
 #endif

@@ -6,7 +6,7 @@
 #include <sdk/GameUpdatePacket.h>
 #include <sdk/sdk.h>
 #include <algorithm>
-
+#include <intrin.h>
 
 std::string gt::generate_mac(const std::string& prefix) {
     std::string x = prefix + ":";
@@ -73,6 +73,13 @@ std::string gt::get_type_string(uint8_t type) {
     if (type >= PACKET_MAXVAL)
         type = PACKET_MAXVAL - 1; //will set any unknown type as errortype and keep us from crashing
     return types[type];
+}
+#define WORDn(x, n) (*((WORD*)&(x) + n))
+int16_t gt::get_cpuid() {
+    int32_t regs[4];
+    __cpuid((int*)regs, 0);
+   
+    return WORDn(regs[0], 1) + WORDn(regs[1], 1) + WORDn(regs[2], 1) + WORDn(regs[3], 1) + regs[0] + regs[1] + regs[2] + regs[3];
 }
 
 void gt::send(int type, std::string message, bool hook_send) {
