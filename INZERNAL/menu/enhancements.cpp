@@ -3,7 +3,8 @@
 #include <sdk/sdk.h>
 
 void menu::enhancements_tab() {
-    
+    ImGui::Text("This tab is currently under modification.");
+
     if (ImGui::CollapsingHeader("Custom Server")) {
         if (ImGui::BeginChild("###customserver", AUTOSIZE(2.f), true)) {
             imwrap::checkbox("Enable###custom", opt::custom_server_on, "You can use this to connect to private servers too");

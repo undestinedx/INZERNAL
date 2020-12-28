@@ -34,7 +34,7 @@ void menu::EndScene(IDirect3DDevice9* device, bool active) {
         ImGui::NewFrame();
 
         ImGui::SetNextWindowPos(ImVec2{ 0, 0 }, ImGuiCond_Once);
-        ImGui::SetNextWindowSize(ImVec2{ 800, 500 }, ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2{ 800, 450 }, ImGuiCond_Once);
 
         if (global::draw && ImGui::Begin(std::string("INZERNAL " + global::version).c_str(), &global::draw, ImGuiWindowFlags_NoCollapse)) {
             animate();
