@@ -4,8 +4,9 @@
 
 # 
 
-#### Features
-* Currently adding more, see code for yourself.
+#### Screenshots
+![Cheats](https://i.imgur.com/M4LLRLY.png)
+![Framework](https://i.imgur.com/P3oPaJQ.png)
 
 # 
 
