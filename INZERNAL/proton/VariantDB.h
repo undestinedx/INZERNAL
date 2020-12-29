@@ -111,6 +111,7 @@ public:
 	int DeleteVarsStartingWith(string deleteStr); //returns how many were deleted
 	int DeleteVar(string keyName); //returns how many were deleted (0 or 1..)
 
+	void SetVarGhetto(string name, Variant val);
 	//you can load and save the variables in the DB on the fly.  (Does nothing with the functions)
 	bool Save(const string& fileName, bool bAddBasePath = true);
 	bool Load(const string& fileName, bool* pFileExistedOut = NULL, bool bAddBasePath = true);

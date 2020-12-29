@@ -1,6 +1,7 @@
 #pragma once
 #include <menu/menu.h>
 #include <sdk/sdk.h>
+#include <proton\VariantDB.h>
 
 void menu::framework_tab() {
     imwrap::prep_columns(3);
@@ -193,6 +194,13 @@ void menu::framework_tab() {
     
     imwrap::tooltip("Does not do validity checks for checking if you actually have the keys, so can crash.");
     ImGui::SameLine();
+    if (ImGui::Button("Print save.dat variantdb")) {
+      
+     auto vardb = (VariantDB*)((uintptr_t)global::app + 3976);
+        vardb->Print();
+    }
+   
+
     ImGui::Text("GameLogic: %llx", logic);
 }
 
