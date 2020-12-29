@@ -29,11 +29,6 @@ void on_inject() {
     utils::attach_console();
 
     SetConsoleTitleA("[INZERNAL]");
-
-    //TODO leaving stuff with this for V0.6
-    //uint32_t uint3 = (uint16_t)gt::get_cpuid() + 1;
-    //printf("Registry keys (testing): %d, %d\n", (uint3 >> 1), uint3);
-
     utils::printc("96", "INZERNAL - internal framework and enhancement suite");
     utils::printc("1;40;31", "\tspecial thanks to ness for patcher");
     utils::printc("92", "\tmade by ama - https://github.com/ama6nen/INZERNAL\n");

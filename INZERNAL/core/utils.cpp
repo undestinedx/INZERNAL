@@ -428,4 +428,16 @@ bool utils::is_number(const std::string& s) {
     return !s.empty() && std::find_if(s.begin() + (*s.data() == '-' ? 1 : 0), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
 }
 
+bool utils::read_reg_value(LPCSTR subkey, LPCSTR value, LPBYTE data, LPDWORD data_len) {
+    *data_len = 1024;
+    DWORD type = 3;
+    HKEY hkey;
+    if (RegOpenKeyExA(HKEY_CURRENT_USER, subkey, 0, 1, &hkey))
+        return false;
+
+    int res = RegQueryValueExA(hkey, value, 0, &type, data, data_len);
+    RegCloseKey(hkey);
+    return res == 0;
+}
+
 #pragma endregion

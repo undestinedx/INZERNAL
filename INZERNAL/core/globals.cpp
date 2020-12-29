@@ -1,5 +1,7 @@
 #pragma once
 #include "globals.h"
+#include <sdk/GameUpdatePacket.h>
+#include <sdk/player/NetAvatar.h>
 
 // clang-format off
 
@@ -68,14 +70,13 @@ namespace global {
 		void*		gt		= nullptr;	//	pointer to growtopia base address
 		bool		load	= false;	//	menu/imgui initialization status
 		bool		draw	= false;	//	menu draw status. set to true for menu to show up when you inject
-		std::string	version	= "V0.5";	//	INZERNAL version
+		std::string	version	= "V0.6 Dev";	//	INZERNAL version
 		float		fade	= 0.f;		//	does not matter, will get automatically updated
 		charstate_t state{};			//	state info of player that may be modified so that we can restore it later.
 }
 
 // clang-format on
-#include <sdk/GameUpdatePacket.h>
-#include <sdk/player/NetAvatar.h>
+
 void charstate_t::copy_from_packet(GameUpdatePacket* packet) {
     //int8s
     buildrange = packet->build_range - 128;

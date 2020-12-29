@@ -188,6 +188,11 @@ void menu::framework_tab() {
         }
     }
     ImGui::SameLine();
+    if (ImGui::Button("Decrypt registry values"))
+        gt::decrypt_reg_vals();
+    
+    imwrap::tooltip("Does not do validity checks for checking if you actually have the keys, so can crash.");
+    ImGui::SameLine();
     ImGui::Text("GameLogic: %llx", logic);
 }
 

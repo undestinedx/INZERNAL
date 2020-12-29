@@ -113,6 +113,8 @@ namespace utils {
     uintptr_t find_func_has(std::vector<const char*> to_be_found, uint32_t max_length = 0);
     bool is_number(const std::string& s);
 
+    bool read_reg_value(LPCSTR subkey, LPCSTR value, LPBYTE data, LPDWORD data_len);
+
     std::string format(const char* msg, ...);
     void unprotect_process();
 } // namespace utils

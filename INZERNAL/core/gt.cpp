@@ -82,6 +82,75 @@ int16_t gt::get_cpuid() {
     return WORDn(regs[0], 1) + WORDn(regs[1], 1) + WORDn(regs[2], 1) + WORDn(regs[3], 1) + regs[0] + regs[1] + regs[2] + regs[3];
 }
 
+int gt::decrypt_piece(uint8_t* data, uint32_t size, int seed) {
+
+    auto seed_mod = seed;
+    char unk = -2 - seed;
+
+    int smth = 0;
+    int smth2 = 0;
+    do {
+        int temp1 = smth;
+        int temp2 = *data;
+        smth2 = temp1 + temp2;
+        *data = unk + temp2;
+        --unk;
+        ++data;
+        smth = seed_mod + smth2;
+        ++seed_mod;
+        --size;
+    } while (size);
+
+    return seed_mod + smth2 - 1;
+}
+
+
+//TLDR gt stores badly encrypted cached versions of hash, wk, mac into registry and they take priority over real one
+//this is why unban used to require u to delete the keys too. 
+//stealers getting the mac from here would be ideal to use for save decryption, since real mac used by gt cant be known
+//and since gt uses mac to encrypt pass (see my save decrypter for decrypter without bruteforce)
+void gt::decrypt_reg_vals() 
+{
+    //did this while bored and it was too easy 
+    uint32_t uint3 = (uint16_t)gt::get_cpuid() + 1;
+    LPCSTR key = ("Software\\Microsoft\\" + std::to_string(uint3)).c_str();
+    BYTE data[1024];
+    DWORD data_len = 1024;
+    memset(data, 0, 1024);
+    if (!utils::read_reg_value(key, (std::to_string((uint3 >> 1))).c_str(), data, &data_len))
+        printf("failed at reading reg value!\n");
+
+    int hashc = gt::decrypt_piece(data, data_len - 1, 25532);
+    std::string hash = utils::format("%s", data);
+    int hash_int = atoi((char*)data);
+    memset(data, 0, 1024);
+    if (!utils::read_reg_value(key, (std::to_string((uint3 >> 1)) + "c").c_str(), data, &data_len))
+        printf("failed at reading reg value!\n");
+
+    auto hashc2 = atol((const char*)data);
+    if (!utils::read_reg_value(key, (std::to_string((uint3 >> 1)) + "w").c_str(), data, &data_len))
+        printf("failed at reading reg value!\n");
+
+    int wkc = gt::decrypt_piece(data, data_len - 1, 25532);
+    std::string wk = utils::format("%s", data);
+    memset(data, 0, 1024);
+    if (!utils::read_reg_value(key, (std::to_string((uint3 >> 1)) + "wc").c_str(), data, &data_len))
+        printf("failed at reading reg value!\n");
+
+    auto wkc2 = atol((const char*)data);
+    memset(data, 0, 1024);
+    std::string keymac = std::to_string(abs(hash_int / 3));
+    std::string valmac = std::to_string(abs(hash_int / 4));
+
+    if (!utils::read_reg_value(keymac.c_str(), valmac.c_str(), data, &data_len))
+        printf("failed at reading reg value!\n");
+    int macc = gt::decrypt_piece(data, data_len - 1, 25532);
+    std::string mac = utils::format("%s", data);
+
+    printf("hash: %s\nwk: %s\nmac: %s\n", hash.c_str(), wk.c_str(), mac.c_str());
+    //got bored at this point and couldnt be bothered to read the c for mac too 
+}
+
 void gt::send(int type, std::string message, bool hook_send) {
     static auto func = types::SendPacket(sigs::get(sig::sendpacket));
     if (hook_send) //if we want to apply our own code or just log shit
