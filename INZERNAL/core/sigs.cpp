@@ -19,9 +19,8 @@ uintptr_t sigs::add_pattern(std::string name, std::string pattern, int type, int
                 //                    Curr address offset     +               Offset in instruction
                 auto offset = (address - global::gt) + (utils::read<uint32_t>(address, 0) + sizeof(uint32_t));
 
-                address = (global::gt + offset);
-                if (name.find("s_render") != -1)
-                    address = *(uintptr_t*)(address); //deref for s_render
+                address = (global::gt + offset); 
+                //dont instantly dereference since s_renderD3D9 is not initialized for everyone upon patching
             }
 
             break;

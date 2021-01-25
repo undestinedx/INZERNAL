@@ -58,6 +58,7 @@ namespace hooks {
     extern WNDPROC wndproc;
     extern LPVOID endscene;
 
+    void init_endscene();
     void init();
     void destroy();
 

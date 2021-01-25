@@ -13,6 +13,29 @@ void menu::cheats_tab() {
         local->send_nazi_slime(int(pos.x / 32.f) - 3, int(pos.y / 32.f) - 3);
     }
 
+    //SELF TODO:
+    //Add proper changelog in github projects
+    //Red punch shit
+    //Actually cleanup shit
+    //Respond to stuff in discussions
+    //TODO//TODO
+    //TODO
+    //TODO
+    //TODO
+    //TODO
+    //TODO
+    //TODO
+    //TODO
+    //TODO
+    //TODO
+    //TODO
+    //TODO
+    //TODO
+    //TODO
+    //TODO
+    //TODO
+
+
     //commented for now - added too many things and things are pretty messy ATM
     /*   static types::time timer2 = std::chrono::system_clock::now();
     if (local && utils::run_at_interval(timer2, 0.1)) {

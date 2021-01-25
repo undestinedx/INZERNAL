@@ -181,6 +181,7 @@ struct charstate_t {
 namespace global {
 	extern App*			app;
 	extern bool			unload;
+	extern bool			d9init;
 	extern HWND			hwnd;
 	extern uintptr_t	gt;
 	extern bool			load;

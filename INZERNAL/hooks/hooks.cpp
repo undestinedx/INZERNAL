@@ -19,18 +19,55 @@ LPVOID hooks::endscene;
 hookmanager* hookmgr = new hookmanager();
 bool canrender = false;
 
+void hooks::init_endscene() {
+    if (global::d9init)
+        return;
+
+    auto s_renderD3D9 = *(uintptr_t*)sigs::get(sig::s_renderd3d9);
+
+    if (!s_renderD3D9)
+        return;
+
+    //source for s_RenderD3D9: https://github.com/bkaradzic/bgfx/blob/master/src/renderer_d3d9.cpp
+    //the dx9 rendering device that GT (bgfx) uses as well
+
+    auto m_d3d9ex = *(IDirect3D9Ex**)(s_renderD3D9 + 312);
+    void** vtable = nullptr;
+    if (m_d3d9ex) { //bgfx proefers m_deviceEx if m_d3d9ex exists
+        auto m_deviceEx = *(IDirect3DDevice9Ex**)(s_renderD3D9 + 320);
+        if (!m_deviceEx) {
+            auto m_device = *(IDirect3DDevice9**)(s_renderD3D9 + 336);
+            if (!m_device)
+                return;
+            vtable = *reinterpret_cast<void***>(m_device);
+        }
+        vtable = *reinterpret_cast<void***>(m_deviceEx);
+    }
+    else {
+        auto m_device = *(IDirect3DDevice9**)(s_renderD3D9 + 336);
+        if (!m_device)
+            return;
+        vtable = *reinterpret_cast<void***>(m_device);
+    }
+    if (!vtable)
+        return;
+    global::d9init = true;
+    MH_CreateHook(LPVOID(vtable[42]), EndScene, (void**)(&hooks::endscene));
+    MH_EnableHook(LPVOID(vtable[42]));
+    utils::printc("93", "Hooked endscene");
+}
+
 void hooks::init() {
     global::hwnd = FindWindowA(nullptr, "Growtopia");
 
-    //the dx9 rendering device that GT (bgfx) uses as well, as for 336 thats the offset of m_device in s_renderd3d9
-    auto device = *(IDirect3DDevice9**)(sigs::get(sig::s_renderd3d9) + 336);
-    auto vtable = *reinterpret_cast<void***>(device);
-
-    MH_CreateHook(LPVOID(vtable[42]), EndScene, (void**)(&hooks::endscene));
+    init_endscene();
 
     //hooks can now be found in sigs.cpp, they are directly set up there
     for (auto hk : hookmgr->hooks)
         MH_CreateHook(hk->address, hk->hooked, &hk->orig);
+
+    if (!global::hwnd)
+        printf("TESTING: HWND not found\n");
 
     wndproc = WNDPROC(SetWindowLongPtrW(global::hwnd, -4, LONG_PTR(WndProc)));
 
@@ -128,16 +165,16 @@ void __cdecl hooks::HandleTouch(LevelTouchComponent* touch, CL_Vec2f pos, bool s
 
     auto rend = sdk::GetGameLogic()->renderer;
     if (rend && global::draw && active) {
-     //   auto screen = rend->GetCamera()->WorldToScreen(pos);
+        //   auto screen = rend->GetCamera()->WorldToScreen(pos);
         auto screen = rend->GetCamera()->WorldToScreen(pos);
-   //     auto pos = ImGui::GetWindowPos();
-     //   auto size = ImGui::GetWindowSize();
+        //     auto pos = ImGui::GetWindowPos();
+        //   auto size = ImGui::GetWindowSize();
         //imgui cant call these during this time so just save them somewhere when not lazy
 
-       /* if (screen.x >= pos.x && screen.x <= (pos.x + size.x) && screen.y >= pos.y && screen.y <= (pos.y + size.y)) {
+        /* if (screen.x >= pos.x && screen.x <= (pos.x + size.x) && screen.y >= pos.y && screen.y <= (pos.y + size.y)) {
             printf("good for us?\n");
         }*/
-          //  return;
+        //  return;
     }
     if (opt::cheat::tp_click && GetAsyncKeyState(VK_CONTROL)) {
         //localplayer is guaranteed to be a valid pointer here according to xrefs

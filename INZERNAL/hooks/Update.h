@@ -85,6 +85,9 @@ class UpdateManager {
         if (!global::app && app)
             OnInject(app);
 
+        if (!global::d9init)
+            hooks::init_endscene();
+
         auto gamelogic = sdk::GetGameLogic();
         if (gamelogic && !NoMoreUpdating) {
             auto player = gamelogic->GetLocalPlayer();

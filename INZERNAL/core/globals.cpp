@@ -72,6 +72,7 @@ namespace global {
 		HWND		hwnd	= NULL;		//	pointer to hwnd of Growtopia window
 		App*		app		= nullptr;	//	pointer to App instance
 		bool		unload	= false;	//	proces terminates when set to true
+		bool		d9init	= false;	//	has s_renderD3D9 yet been init? if not, then check in App::Update for news
 		uintptr_t	gt		= 0;		//	growtopia base address
 		bool		load	= false;	//	menu/imgui initialization status
 		bool		draw	= false;	//	menu draw status. set to true for menu to show up when you inject

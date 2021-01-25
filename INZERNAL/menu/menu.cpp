@@ -65,6 +65,9 @@ void menu::EndScene(IDirect3DDevice9* device, bool active) {
 
 bool menu::WndProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     static bool init = false;
+    if (!global::d9init)
+        return false;
+
     if (global::load && !init) {
         ImGui_ImplWin32_Init(wnd);
         init = true;
