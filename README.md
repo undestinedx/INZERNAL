@@ -1,11 +1,11 @@
 # INZERNAL
-#### Growtopia internal cheat focused around enhancements, clean code, support across versions, and frameworok
+#### Growtopia internal cheat focused around clean code, random features, and framework/sdk
 
 
 # 
 
 #### Screenshots
-![Cheats](https://i.imgur.com/M4LLRLY.png)
+![Cheats](https://i.imgur.com/yh8QNUT.png)
 ![Framework](https://i.imgur.com/P3oPaJQ.png)
 
 # 
