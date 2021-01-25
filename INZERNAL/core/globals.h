@@ -20,29 +20,51 @@
 #include <core/json.hpp>
 #include <map>
 #include <string>
+#include <chrono>
 
 // clang-format off
 
+//TODO: move this
+struct TextureD3D9 {
+    union {
+        IDirect3DBaseTexture9* m_ptr;
+        IDirect3DTexture9* m_texture2d;
+        IDirect3DVolumeTexture9* m_texture3d;
+        IDirect3DCubeTexture9* m_textureCube;
+    };
 
-//from private internal, dont remember what I needed these for so I just brought them over for now
-template<typename t> inline constexpr t operator&(t x, t y) { return static_cast<t> (static_cast<int>(x) & static_cast<int>(y)); }
-template<typename t> inline constexpr t operator|(t x, t y) { return static_cast<t> (static_cast<int>(x) | static_cast<int>(y)); }
-template<typename t> inline constexpr t operator^(t x, t y) { return static_cast<t> (static_cast<int>(x) ^ static_cast<int>(y)); }
-template<typename t> inline constexpr t operator~(t x) { return static_cast<t>(~static_cast<int>(x)); }
-template<typename t> inline t& operator&=(t& x, t y) { x = x & y;	return x; }
-template<typename t> inline t& operator|=(t& x, t y) { x = x | y;	return x; }
-template<typename t> inline t& operator^=(t& x, t y) { x = x ^ y;	return x; }
+    IDirect3DSurface9* m_surface;
+
+    union {
+        IDirect3DBaseTexture9* m_staging;
+        IDirect3DTexture9* m_staging2d;
+        IDirect3DVolumeTexture9* m_staging3d;
+        IDirect3DCubeTexture9* m_stagingCube;
+    };
+
+    uint64_t m_flags;
+    uint32_t m_width;
+    uint32_t m_height;
+    uint32_t m_depth;
+    uint8_t m_numMips;
+    uint8_t m_type;
+    uint8_t m_requestedFormat;
+    uint8_t m_textureFormat;
+};
+
 
 class BaseApp {public:};
-class GameUpdatePacket;
 class App : BaseApp {public:};
-class AvatarRenderData;
-class WorldObjectMap;
-class NetAvatar;
-class LevelTouchComponent;
-class WorldCamera;
 class variantlist_t;
-class GameLogic;
+struct GameUpdatePacket;
+struct AvatarRenderData;
+struct WorldObjectMap;
+struct NetAvatar;
+struct LevelTouchComponent;
+struct WorldCamera;
+struct GameLogic;
+struct SurfaceAnim;
+struct ResourceManager;
 
 namespace types {
 	//hooked
@@ -51,8 +73,12 @@ namespace types {
 	using	ProcessTankUpdatePacket		= void(__cdecl*)(GameLogic*, GameUpdatePacket*);
 
 	//other functions, not hooked
-	using	WorldToScreen				= void(__cdecl*)(WorldCamera*, CL_Vec2f&, CL_Vec2f&);
-	using	OnDataConfig				= void(__cdecl*)(NetAvatar*, variantlist_t*);
+	using	WorldToScreen				= void(__cdecl*)(WorldCamera*, CL_Vec2f&, CL_Vec2f);
+	using	SetCharacterExtraMods		= void(__cdecl*)(NetAvatar*, uint8_t*);
+	using	GetSurfaceAnim				= SurfaceAnim*(__cdecl*)(ResourceManager*, const std::string&, bool);
+
+	typedef	std::chrono::duration<double> elapsed;
+	typedef std::chrono::system_clock::time_point time;
 }
 
 enum WinSpoof {
@@ -74,6 +100,7 @@ namespace logging {
 			 processtank = (1 << 2), //just the type, not the full info
 			 callfunction = (1 << 3), //processtankupdatepacket CALL_FUNCTION serializes as variantlist
 			 logmsg	= (1 << 4), //LogMsg function
+			 callfuncspr = (1 << 5) //sendpacketraw CALL_FUNCTION serializes as variantlist
 		 };
 
 		extern bool	enabled;
@@ -85,6 +112,7 @@ namespace logging {
 namespace opt {
 	
 	extern std::string	gt_version;
+	extern std::string	gt_supported;
 	extern float		fps_limit;
 
 	extern bool			spoof_login;
@@ -100,9 +128,15 @@ namespace opt {
 		extern bool		dev_zoom;
 		extern bool		block_sendpacketraw;
 		extern bool		antighost;
-		extern bool			tp_click;
-		extern bool			mod_zoom;
-		extern bool			see_ghosts;
+		extern bool		tp_click;
+		extern bool		mod_zoom;
+		extern bool		see_ghosts;
+		extern bool		dash;
+		extern bool		jump_charge;
+		extern bool		jump_cancel;
+		extern bool		antipunch;
+		extern bool		see_fruits;
+		extern bool		dialog_cheat;
 
 		extern bool		punch_cooldown_on;
 		extern float	punch_cooldown_val;
@@ -145,11 +179,10 @@ struct charstate_t {
 	void copy_inject(NetAvatar* player, bool is_local); 
 };
 namespace global {
-	extern HMODULE		self;
 	extern App*			app;
 	extern bool			unload;
 	extern HWND			hwnd;
-	extern void*		gt;
+	extern uintptr_t	gt;
 	extern bool			load;
 	extern bool			draw;
 	extern std::string	version;

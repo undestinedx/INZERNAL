@@ -422,6 +422,75 @@
     <ClInclude Include="sdk\Consts.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="menu\imgui\impl\fonts\droidsans.ttf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\fonts\icons_font_awesome.ttf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\fonts\icons_kenney.ttf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\fonts\roboto_regular.ttf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\fonts\robotomono_regular.ttf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\fs_imgui_color.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\fs_imgui_cubemap.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\fs_imgui_image.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\fs_imgui_image_swizz.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\fs_imgui_latlong.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\fs_imgui_texture.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\fs_ocornut_imgui.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\vs_imgui_color.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\vs_imgui_cubemap.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\vs_imgui_image.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\vs_imgui_latlong.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\vs_imgui_texture.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\imgui\impl\shaders\vs_ocornut_imgui.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\player\PlayerItems.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\world\ParticleSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\Surface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\ResourceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\NetObjectManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="inzernal.def">

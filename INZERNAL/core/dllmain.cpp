@@ -9,6 +9,7 @@
 #include <core/sigs.hpp>
 
 bool unload_done = false;
+HMODULE self = nullptr;
 void on_exit() {
     if (unload_done) //since this function can be called by DLL_PROCESS_DETACH and unload loop, we only want to do this once.
         return;
@@ -22,7 +23,7 @@ void on_exit() {
     utils::detach_console();
 
     unload_done = true;
-    FreeLibraryAndExitThread(HMODULE(global::self), 1);
+    FreeLibraryAndExitThread(self, 1);
 }
 void on_inject() {
     MH_Initialize();
@@ -33,12 +34,14 @@ void on_inject() {
     utils::printc("1;40;31", "\tspecial thanks to ness for patcher");
     utils::printc("92", "\tmade by ama - https://github.com/ama6nen/INZERNAL\n");
 
-    printf("Base address: 0x%llx\n", (uintptr_t)global::gt);
+    printf("Base address: 0x%llx\n", global::gt);
     utils::seed_random();
     sigs::init();
 
     if (!gt::patch_banbypass())
         on_exit();
+    if (!gt::patch_mutex())
+        printf("Failed in patching mutex checks, your choice if you want to still keep running.\n");
 
     hooks::init();
 
@@ -54,8 +57,8 @@ void dll() {
 
 BOOL WINAPI DllMain(HINSTANCE dll, DWORD reason, LPVOID reserved) {
     if (reason == DLL_PROCESS_ATTACH) {
-        global::self = HMODULE(dll);
-        global::gt = GetModuleHandleW(nullptr);
+        self = HMODULE(dll);
+        global::gt = (uintptr_t)GetModuleHandleW(nullptr);
         DisableThreadLibraryCalls(HMODULE(dll));
         CreateThread(nullptr, 0, LPTHREAD_START_ROUTINE(on_inject), nullptr, 0, nullptr);
         return 1;

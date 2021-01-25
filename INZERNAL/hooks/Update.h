@@ -29,6 +29,7 @@ class UpdateManager {
 
         global::state.copy_inject(player, true);
         player->SetModStatus(opt::cheat::mod_zoom, opt::cheat::dev_zoom);
+        player->SetCharacterMods(opt::cheat::dash, opt::cheat::jump_charge, opt::cheat::jump_cancel);
     }
     static void OnDestroy() {
         NoMoreUpdating = true;
@@ -43,6 +44,9 @@ class UpdateManager {
         if (!local)
             return;
 
+        local->SetModStatus(false, false);
+        local->SetCharacterMods(false, false, false);
+
         if (opt::cheat::gravity_on)
             local->gravity.set(global::state.gravity);
         if (opt::cheat::accel_on)
@@ -54,6 +58,7 @@ class UpdateManager {
     }
     static void OnJoinedWorld(NetAvatar* local) {
         local->SetModStatus(opt::cheat::mod_zoom, opt::cheat::dev_zoom);
+        local->SetCharacterMods(opt::cheat::dash, opt::cheat::jump_charge, opt::cheat::jump_cancel);
     }
     static void OnUpdateInWorld(App* app, NetAvatar* local) {
         if (opt::cheat::gravity_on) {
@@ -72,6 +77,7 @@ class UpdateManager {
             if (opt::cheat::waterspeed_val != local->water_speed)
                 local->water_speed = opt::cheat::waterspeed_val;
         }
+
     }
     //any kind of continuous code can be ran here
     static void Execute(App* app) {
@@ -84,8 +90,9 @@ class UpdateManager {
             auto player = gamelogic->GetLocalPlayer();
             if (player)
                 OnUpdateInWorld(app, player);
-        }
 
+        }
+        
         orig(app);
     }
 };

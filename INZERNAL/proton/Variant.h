@@ -16,7 +16,7 @@
 //#define SETH_SIGNALS
 
 class Entity;
-class EntityComponent;
+struct EntityComponent;
 class VariantList;
 
 enum eInterpolateType
@@ -388,7 +388,7 @@ inline Variant operator-(Variant lhs, const Variant& rhs);
 
 //a VariantList holds a group of variants, we pass these when we don't know in advance how many variants we want to use
 
-#define C_MAX_VARIANT_LIST_PARMS 9
+#define C_MAX_VARIANT_LIST_PARMS 7
 
 /*
 //example of memory serialization of a VariantList

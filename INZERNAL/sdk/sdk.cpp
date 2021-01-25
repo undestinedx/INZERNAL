@@ -14,3 +14,7 @@ ENetClient* sdk::GetClient() {
 ENetPeer* sdk::GetPeer() {
     return GetClient()->peer;
 }
+
+App* sdk::GetApp() {
+    return nullptr; //nullptr for now
+}

@@ -1,6 +1,5 @@
 #pragma once
-#include "globals.h"
-#include <sdk/GameUpdatePacket.h>
+#include <core/globals.h>
 #include <sdk/player/NetAvatar.h>
 
 // clang-format off
@@ -11,9 +10,9 @@ namespace logging {
 		bool	enabled		= true; //master switch for all logging
 	
 		//logging in console
-		int		console		= sendpacket | callfunction;
+		int		console		= callfunction;
 
-		//logging in menu
+		//logging in menu (not yet implemented)
 		int		max_count	= 500;  //max events in menu, for performance concerns.
 		int		menu		= sendpacket | sendpacketraw | processtank | callfunction;
 }
@@ -23,7 +22,8 @@ namespace opt {
 
 	//enhanchements 
 	float		fps_limit	= 144.0f;	//fps limit gets forced to this
-	std::string	gt_version	= "3.51";	//gt version gets spoofed to this
+	std::string	gt_version	= "3.52";	//gt version gets spoofed to this
+	std::string	gt_supported= "3.51";	//the gt version for which INZERNAL was built for. Probably wont work for other versions.
 
 	bool		spoof_login	= true;		//whether or not to spoof mac, hash2, wk, rid, etc on login. GT version spoofed even when off.
 	bool		spoof_name	= true;		//Also set the requestedName field to random. Might be unwanted for non grow-id accounts.
@@ -42,6 +42,12 @@ namespace opt {
 		bool	antighost			= true;		//	ignores ghost effect.
 		bool	tp_click			= true;		//when on, holding CTRL allows you to tp to mouse location.
 		bool	see_ghosts			= true;		//allows you to see ghosts so you can avoid constant slime
+		bool	dash				= false;	//allows you to perform dashing when double clicking A/D
+		bool	jump_charge			= false;	//switches jumping mode to charging
+		bool	jump_cancel			= false;	//tapping W in air instantly stops the ascent and instantly starts bringing you down
+		bool	antipunch			= true;		//basically (personal) punch jammer even when there is none
+		bool	see_fruits			= false;	//See how many fruits a tree will have, before it has grown. Visually sets them to be fully grown though.
+		bool	dialog_cheat		= false;	//Allows you to move when dialogs are opened, also punch and do other things.
 
 		bool	punch_cooldown_on	= true;		//	custom punch cooldown
 		float	punch_cooldown_val	= 0.15f;
@@ -63,14 +69,13 @@ namespace opt {
 
 //other variables
 namespace global {
-		HMODULE		self	= NULL;		//	pointer to the dll module
 		HWND		hwnd	= NULL;		//	pointer to hwnd of Growtopia window
 		App*		app		= nullptr;	//	pointer to App instance
 		bool		unload	= false;	//	proces terminates when set to true
-		void*		gt		= nullptr;	//	pointer to growtopia base address
+		uintptr_t	gt		= 0;		//	growtopia base address
 		bool		load	= false;	//	menu/imgui initialization status
 		bool		draw	= false;	//	menu draw status. set to true for menu to show up when you inject
-		std::string	version	= "V0.6 Dev";	//	INZERNAL version
+		std::string	version	= "V0.6 Beta";	//	INZERNAL version
 		float		fade	= 0.f;		//	does not matter, will get automatically updated
 		charstate_t state{};			//	state info of player that may be modified so that we can restore it later.
 }
@@ -96,6 +101,10 @@ void charstate_t::copy_from_packet(GameUpdatePacket* packet) {
     eye_shade_color = packet->eye_shade_color;
     eff_flags1 = packet->effect_flags;
     eff_flags2 = packet->flags;
+    if (opt::cheat::antighost) {//remove mindcontrol mod
+        packet->flags &= ~(1 << 11);
+        eff_flags2 &= ~(1 << 11); 
+    }
 }
 
 void charstate_t::copy_inject(NetAvatar* player, bool is_local) {

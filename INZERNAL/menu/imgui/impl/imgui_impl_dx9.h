@@ -11,6 +11,7 @@
 
 #pragma once
 #include <menu/imgui/imgui.h>      // IMGUI_IMPL_API
+#include <cstdint>
 
 struct IDirect3DDevice9;
 

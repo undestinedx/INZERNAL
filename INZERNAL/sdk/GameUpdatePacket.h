@@ -180,9 +180,14 @@ enum {
     PACKET_ACTIVE_ARROW_TO_ITEM,
     PACKET_SELECT_TILE_INDEX,
     PACKET_SEND_PLAYER_TRIBUTE_DATA, //39
-    PACKET_SET_EXTRA_MODS, //this is 45, but keeping as 40, idk if its some GT error of they are missing names for 40-454
-    PACKET_ON_STEP_ON_TILE_MOD, //46 same
-    PACKET_MAXVAL //not real, just for string overflow
+    PACKET_PVE_UNK1, //no names for these 5, so i named them unk. 
+    PACKET_PVE_UNK2,
+    PACKET_PVE_UNK3,
+    PACKET_PVE_UNK4,
+    PACKET_PVE_UNK5,
+    PACKET_SET_EXTRA_MODS,           
+    PACKET_ON_STEP_ON_TILE_MOD,     
+    PACKET_MAXVAL                    //not real, just for string overflow
 };
 enum {
     NET_MESSAGE_UNKNOWN = 0,
@@ -195,3 +200,25 @@ enum {
     NET_MESSAGE_CLIENT_LOG_REQUEST,
     NET_MESSAGE_CLIENT_LOG_RESPONSE,
 };
+
+#pragma pack(push, 1)
+struct GameUpdatePacketSimple {
+    uint8_t type;    //0
+    uint8_t objtype; //1
+    uint8_t count1;
+    uint8_t count2;
+    int32_t netid;
+    int32_t item;
+    int32_t flags; //12 - 0xC
+    float float1;
+    int32_t int_data;
+    float vec_x;
+    float vec_y;
+    float vec2_x;
+    float vec2_y;
+    float float2;
+    int32_t int_x;
+    int32_t int_y;
+    uint32_t data_size;
+};
+#pragma pack(pop)

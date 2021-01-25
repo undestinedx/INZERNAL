@@ -10,11 +10,8 @@ class SendPacketHook {
    public:
     static void Execute(int type, std::string& packet, ENetPeer* peer) {
         static auto orig = decltype(&hooks::SendPacket)(hookmgr->orig(sig::sendpacket));
-        if (type == NET_MESSAGE_CLIENT_LOG_RESPONSE) //dont send crash log to gt.
+        if (type > NET_MESSAGE_GAME_PACKET) //dont send any tracking packets, crash logs, or other shit to gt.
             return;
-
-        if (logging::enabled && logging::console & logging::sendpacket)
-            printf("[sendpacket] type: %d\n%s\n", type, packet.c_str());
 
         if (packet.find("game_version|") != -1 && opt::spoof_login) {
             auto var = RTVar::parse(packet);
@@ -22,7 +19,14 @@ class SendPacketHook {
             auto hash_str = mac + "RT";
             auto hash2 = HashString(hash_str.c_str(), hash_str.length());
 
-            if (var.get("game_version") != opt::gt_version) //not optimal due to not checking if float is bigger
+         /*   static bool once = false;
+            if (!once) {
+                var.get("game_version") != 
+                    gt::send_varlist_self({ "OnAddNotification",  })
+                once = true;
+            }*/
+         
+            if (var.get("game_version") != opt::gt_version)
                 var.set("game_version", opt::gt_version);
 
             var.set("mac", mac);
@@ -37,8 +41,8 @@ class SendPacketHook {
                 var.set("zf", std::to_string(utils::random(INT_MIN, INT_MAX)));
             }
             else if (opt::spoof_win == WinSpoof::wsMimic) { //win-specific file values, mismatching is logged as fake windows.
-                var.set("fz", "7087272");                   //last update: 2.951
-                var.set("zf", "-1573626264");
+                var.set("fz", "7134376");                   //last update: 2.952
+                var.set("zf", "-1331849031");
             }
 
             if (opt::flag_mode == FlagMode::fmRandom)
@@ -54,6 +58,9 @@ class SendPacketHook {
 
             packet = var.serialize();
         }
+
+        if (logging::enabled && logging::console & logging::sendpacket)
+            printf("[sendpacket] type: %d\n%s\n", type, packet.c_str());
 
         orig(type, packet, peer);
     }

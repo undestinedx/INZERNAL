@@ -5,15 +5,25 @@
 
 //WorldRenderer::GetTileMap easy way too it seems
 
-class WorldCamera {
+#pragma pack(push, 1)
+GTClass WorldCamera {
    public:
-    CL_Vec2f WorldToScreen(CL_Vec2f& in) {
+    float pad[4];
+    CL_Vec2f CamWorldPos;
+    float pad2[8];
+    CL_Vec2f ScreenSize;
+    CL_Vec2f ViewableRectSize;
+    float pad3[6];
+
+    CL_Vec2f WorldToScreen(CL_Vec2f in) {
         CL_Vec2f out;
         static auto func = types::WorldToScreen(sigs::get(sig::world2screen));
         func(this, out, in);
         return out;
     }
-
+    CL_Rectf GetViewableWorldRect(){
+        return CL_Rectf{ CamWorldPos.x, CamWorldPos.y, CamWorldPos.x + ViewableRectSize.x, CamWorldPos.y + ViewableRectSize.y };
+    }
     //outdated offset, from private internal.
    /* CL_Vec2f screen_to_world(CL_Vec2f& in) {
         CL_Vec2f out;
@@ -22,3 +32,4 @@ class WorldCamera {
         return out;
     }*/
 };
+#pragma pack(pop)

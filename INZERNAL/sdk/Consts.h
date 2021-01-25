@@ -5,7 +5,6 @@
 #include <sdk/world/World.h>
 #include <core/sigs.hpp>
 
-
 // clang-format off
 namespace {
     enum { 
@@ -34,12 +33,7 @@ namespace {
     };
 }
 
-
 // clang-format on
-
-//important to keep these updated
-static const auto consts_offset = 0x6854A8;
-static const auto counter_offset = 3604;
 
 namespace consts {
 

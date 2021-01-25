@@ -13,6 +13,9 @@ namespace gt {
     int16_t get_cpuid();
     int decrypt_piece(uint8_t* data, uint32_t size, int seed);
     void decrypt_reg_vals();
+
+    void set_extra_character_mods(NetAvatar* player, uint8_t flags);
+
     void send(int type, std::string message, bool hook_send = false);
     void send(GameUpdatePacket* packet, int extra_size = 0, bool hook_send = false);
     void send_self(GameUpdatePacket* packet, bool hook_send = true);
@@ -20,6 +23,7 @@ namespace gt {
 
     void ghetto_fix();
     bool patch_banbypass();
+    bool patch_mutex();
     void join_world(std::string world);
     void show_message(std::string message, int time, int delay);
     void log(std::string msg);

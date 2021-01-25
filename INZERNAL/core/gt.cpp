@@ -1,12 +1,12 @@
 #pragma once
 #include <core/gt.h>
+#include <hooks/ProcessTankUpdatePacket.h>
 #include <hooks/SendPacket.h>
 #include <hooks/SendPacketRaw.h>
-#include <hooks/ProcessTankUpdatePacket.h>
+#include <intrin.h>
 #include <sdk/GameUpdatePacket.h>
 #include <sdk/sdk.h>
 #include <algorithm>
-#include <intrin.h>
 
 std::string gt::generate_mac(const std::string& prefix) {
     std::string x = prefix + ":";
@@ -56,7 +56,7 @@ std::string gt::get_random_flag() {
         done = true;
     }
 
-    return candidates[utils::random(0, candidates.size())];
+    return candidates[utils::random(0, (int)candidates.size())];
 }
 
 std::string gt::get_type_string(uint8_t type) {
@@ -72,18 +72,21 @@ std::string gt::get_type_string(uint8_t type) {
 
     if (type >= PACKET_MAXVAL)
         type = PACKET_MAXVAL - 1; //will set any unknown type as errortype and keep us from crashing
+
+    if (type > 43)
+        return "PACKET_FIXMELATER";
+
     return types[type];
 }
 #define WORDn(x, n) (*((WORD*)&(x) + n))
 int16_t gt::get_cpuid() {
     int32_t regs[4];
     __cpuid((int*)regs, 0);
-   
+
     return WORDn(regs[0], 1) + WORDn(regs[1], 1) + WORDn(regs[2], 1) + WORDn(regs[3], 1) + regs[0] + regs[1] + regs[2] + regs[3];
 }
 
 int gt::decrypt_piece(uint8_t* data, uint32_t size, int seed) {
-
     auto seed_mod = seed;
     char unk = -2 - seed;
 
@@ -104,57 +107,70 @@ int gt::decrypt_piece(uint8_t* data, uint32_t size, int seed) {
     return seed_mod + smth2 - 1;
 }
 
-
 //TLDR gt stores badly encrypted cached versions of hash, wk, mac into registry and they take priority over real one
-//this is why unban used to require u to delete the keys too. 
+//this is why unban used to require u to delete the keys too.
 //stealers getting the mac from here would be ideal to use for save decryption, since real mac used by gt cant be known
 //and since gt uses mac to encrypt pass (see my save decrypter for decrypter without bruteforce)
-void gt::decrypt_reg_vals() 
-{
-    //did this while bored and it was too easy 
+void gt::decrypt_reg_vals() {
+    //did this while bored and it was too easy
     uint32_t uint3 = (uint16_t)gt::get_cpuid() + 1;
     LPCSTR key = ("Software\\Microsoft\\" + std::to_string(uint3)).c_str();
     BYTE data[1024];
     DWORD data_len = 1024;
     memset(data, 0, 1024);
-    if (!utils::read_reg_value(key, (std::to_string((uint3 >> 1))).c_str(), data, &data_len))
-        printf("failed at reading reg value!\n");
+    if (!utils::read_reg_value(key, (std::to_string((uint3 >> 1))).c_str(), data, &data_len)) {
+        printf("failed at reading reg value %s!\n", key);
+        return;
+    }
 
-    int hashc = gt::decrypt_piece(data, data_len - 1, 25532);
-    std::string hash = utils::format("%s", data);
-    int hash_int = atoi((char*)data);
+
+    auto hashc = gt::decrypt_piece(data, data_len - 1, 25532);
+    auto hash = utils::format("%s", data);
+    auto hash_int = atoi((char*)data);
     memset(data, 0, 1024);
-    if (!utils::read_reg_value(key, (std::to_string((uint3 >> 1)) + "c").c_str(), data, &data_len))
-        printf("failed at reading reg value!\n");
-
+    if (!utils::read_reg_value(key, (std::to_string((uint3 >> 1)) + "c").c_str(), data, &data_len)) {
+        printf("failed at reading reg value %s!\n", key);
+        return;
+    }
     auto hashc2 = atol((const char*)data);
-    if (!utils::read_reg_value(key, (std::to_string((uint3 >> 1)) + "w").c_str(), data, &data_len))
-        printf("failed at reading reg value!\n");
-
-    int wkc = gt::decrypt_piece(data, data_len - 1, 25532);
-    std::string wk = utils::format("%s", data);
+    if (!utils::read_reg_value(key, (std::to_string((uint3 >> 1)) + "w").c_str(), data, &data_len)) {
+        printf("failed at reading reg value %s!\n", key);
+        return;
+    }
+    auto wkc = gt::decrypt_piece(data, data_len - 1, 25532);
+    auto wk = utils::format("%s", data);
     memset(data, 0, 1024);
-    if (!utils::read_reg_value(key, (std::to_string((uint3 >> 1)) + "wc").c_str(), data, &data_len))
-        printf("failed at reading reg value!\n");
-
+    if (!utils::read_reg_value(key, (std::to_string((uint3 >> 1)) + "wc").c_str(), data, &data_len)) {
+        printf("failed at reading reg value %s!\n", key);
+        return;
+    }
     auto wkc2 = atol((const char*)data);
     memset(data, 0, 1024);
-    std::string keymac = std::to_string(abs(hash_int / 3));
-    std::string valmac = std::to_string(abs(hash_int / 4));
+    auto keymac = std::to_string(abs(hash_int / 3));
+    auto valmac = std::to_string(abs(hash_int / 4));
 
-    if (!utils::read_reg_value(keymac.c_str(), valmac.c_str(), data, &data_len))
-        printf("failed at reading reg value!\n");
-    int macc = gt::decrypt_piece(data, data_len - 1, 25532);
-    std::string mac = utils::format("%s", data);
+    if (!utils::read_reg_value(keymac.c_str(), valmac.c_str(), data, &data_len)) {
+        printf("failed at reading reg value %s\n", keymac.c_str());
+        return;
+    }
+
+    auto macc = gt::decrypt_piece(data, data_len - 1, 25532);
+    auto mac = utils::format("%s", data);
 
     printf("hash: %s\nwk: %s\nmac: %s\n", hash.c_str(), wk.c_str(), mac.c_str());
-    //got bored at this point and couldnt be bothered to read the c for mac too 
+    //got bored at this point and couldnt be bothered to read the c for mac too
+}
+
+void gt::set_extra_character_mods(NetAvatar* player, uint8_t flags) {
+    static auto func = types::SetCharacterExtraMods(sigs::get(sig::setextracharactermods));
+
+    func(player, &flags);
 }
 
 void gt::send(int type, std::string message, bool hook_send) {
     static auto func = types::SendPacket(sigs::get(sig::sendpacket));
     if (hook_send) //if we want to apply our own code or just log shit
-        SendPacketHook::Execute( type, message, sdk::GetPeer());
+        SendPacketHook::Execute(type, message, sdk::GetPeer());
     else
         func(type, message, sdk::GetPeer());
 }
@@ -187,15 +203,14 @@ void gt::send_varlist_self(variantlist_t variantlist, int netid, int delay, bool
     packet->int_data = delay;
     packet->data_size = data_size;
     memcpy(&packet->data, data, data_size);
-    
-   static auto func = types::ProcessTankUpdatePacket(sigs::get(sig::processtankupdatepacket));
+
+    static auto func = types::ProcessTankUpdatePacket(sigs::get(sig::processtankupdatepacket));
     if (hook_send) //if we want to apply our own code or just log shit
         ProcessTankUpdatePacketHook::Execute(sdk::GetGameLogic(), packet);
     else
         func(sdk::GetGameLogic(), packet);
     free(packet);
     free(data);
-
 }
 
 bool gt::patch_banbypass() {
@@ -217,6 +232,66 @@ bool gt::patch_banbypass() {
         return false;
     }
     return false;
+}
+//#include <memory>
+//#include <winternl.h>
+//
+//#pragma comment(lib, "ntdll")
+//
+//#define NT_SUCCESS(status) (status >= 0)
+//
+//#define STATUS_INFO_LENGTH_MISMATCH ((NTSTATUS)0xC0000004L)
+//
+//
+//typedef struct _PROCESS_HANDLE_TABLE_ENTRY_INFO {
+//    HANDLE HandleValue;
+//    ULONG_PTR HandleCount;
+//    ULONG_PTR PointerCount;
+//    ULONG GrantedAccess;
+//    ULONG ObjectTypeIndex;
+//    ULONG HandleAttributes;
+//    ULONG Reserved;
+//} PROCESS_HANDLE_TABLE_ENTRY_INFO, *PPROCESS_HANDLE_TABLE_ENTRY_INFO;
+//
+//// private
+//typedef struct _PROCESS_HANDLE_SNAPSHOT_INFORMATION {
+//    ULONG_PTR NumberOfHandles;
+//    ULONG_PTR Reserved;
+//    PROCESS_HANDLE_TABLE_ENTRY_INFO Handles[1];
+//} PROCESS_HANDLE_SNAPSHOT_INFORMATION, *PPROCESS_HANDLE_SNAPSHOT_INFORMATION;
+//
+//extern "C" NTSTATUS NTAPI NtQueryInformationProcess(_In_ HANDLE ProcessHandle, _In_ PROCESSINFOCLASS ProcessInformationClass,
+//    _Out_writes_bytes_(ProcessInformationLength) PVOID ProcessInformation, _In_ ULONG ProcessInformationLength, _Out_opt_ PULONG ReturnLength);
+
+bool gt::patch_mutex() {
+    static auto mutex1 = sigs::get(sig::mutexbypass1);
+    static auto mutex2 = sigs::get(sig::mutexbypass2);
+
+    if (!mutex2 || !mutex1) {
+        printf("If you're using a modified GT executable that supports multiboxing (not meaning patcher that comes with INZERNAL)\n"
+            "Then just ignore this warning, although some things might be broken if the file size is different from original, otherwise should be fine.\n"
+            "If that's not the case, you are probably using wrong gt version, or something went horribly wrong.\n");
+        return true;
+    }
+
+    mutex2 -= 9; //Didnt bother fixing negative offsets in sig manager cuz I'm lazy, not a big deal (for now) at least
+
+    //this checks for presence of gt's mutex 247, and will freeze if you delete them
+    auto patched1 = utils::patch_bytes<6>(mutex1, "\x48\x83\xc4\x50\x5b\xc3"); //basic frame stuff and ret
+
+    if (!patched1)
+        return false;
+
+    //the length will probably change with each GT version so I have to remember to change this
+    //(no way im calculating the offset by adding another sig for where to jump etcetc) well prob will actually if I get bored
+    utils::patch_bytes<2>(mutex2, "\xEB\x53"); 
+
+
+    //fow now mutex bypass only works with patcher, since I was too lazy to add proper handle closing thats required for injector
+    //will add it prob by V0.6
+
+    printf("Patched mutex checks\n");
+    return true;
 }
 
 void gt::hit_tile(CL_Vec2i where) {
@@ -267,7 +342,7 @@ void gt::wrench_tile(CL_Vec2i where) {
     gt::send(&packet);
 }
 void gt::water_tile(CL_Vec2i where) {
-     auto local = sdk::GetGameLogic()->GetLocalPlayer();
+    auto local = sdk::GetGameLogic()->GetLocalPlayer();
     if (!local)
         return;
 
@@ -277,7 +352,7 @@ void gt::water_tile(CL_Vec2i where) {
     packet.int_x = where.x;
     packet.int_y = where.y;
     packet.flags = (1 << 5) | (1 << 10) | (1 << 11); //no enum rn so using raw values
-   
+
     auto pos = local->GetPos();
     packet.pos_x = pos.x;
     packet.pos_y = pos.y;

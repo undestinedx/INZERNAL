@@ -1,9 +1,7 @@
 #pragma once
-#include <core/utils.h>
 #include <hooks/hooks.h>
 #include <proton/clanlib/vec2.h>
 #include <sdk/EntityComponent.h>
-#include <sdk/sdk.h>
 #include <proton/variant2.hpp>
 #include <string>
 #include <core/gt.h>
@@ -83,7 +81,16 @@ GTClass NetAvatar { //how fucking annoying it is to get align to work
     int userid;
     char unk7b[16];
     std::string country;
-    char unk8[84];
+    char unk8a[8];
+    bool is_invis;
+    bool is_mod;
+    bool is_supermod;
+    bool some_unk2;
+    bool some_unk3;
+    int tile_id;
+    char pad8b[4];
+    int bubble_status;
+    char unk8[59];
     EncryptedFloat gravity;
     EncryptedFloat accel;
     EncryptedFloat speed;
@@ -106,18 +113,63 @@ GTClass NetAvatar { //how fucking annoying it is to get align to work
     void SetPos(float x, float y) {
         pos.x = x;
         pos.y = y;
-        pos_enc.x = x / 6.5999999;
-        pos_enc.y = y / 1.3;
+        pos_enc.x = x / 6.5999999f;
+        pos_enc.y = y / 1.3f;
     }
     void SetPosAtTile(int x, int y) {
-        SetPos(x * 32 + 8, y * 32);
+        SetPos(x * 32.0f + 8.0f, y * 32.0f);
     }
-#if __has_include("code1.txt")
-    //Promised my friend to keep this a secret for now, so I'm not adding this until its public knowledge
-    void do_stuff2(int x, int y) {
-        #include "code1.txt"
+
+    //was a private feature before but now that its been leaked it will be public
+    void send_nazi_slime(int x, int y) {
+        GameUpdatePacket packet{ 0 };
+        packet.type = 46;
+        packet.int_data = 3728;
+        auto do_stuff = [&](auto x, auto y) {
+
+            packet.int_x = x;
+            packet.int_y = y;
+            for (int i = 0; i < 5; i++) {
+                gt::send(&packet);
+            }
+        };
+
+        do_stuff(x, y);
+        do_stuff(x, y + 1);
+        do_stuff(x, y + 2);
+        do_stuff(x, y + 3);
+        do_stuff(x, y + 4);
+
+        do_stuff(x + 1, y + 4);
+        do_stuff(x + 2, y + 4);
+        do_stuff(x + 3, y + 4);
+        do_stuff(x + 4, y + 4);
+        do_stuff(x + 5, y + 4);
+        do_stuff(x + 6, y + 4);
+
+        do_stuff(x + 6, y + 4);
+        do_stuff(x + 6, y + 5);
+        do_stuff(x + 6, y + 6);
+        do_stuff(x + 6, y + 7);
+
+        do_stuff(x + 6, y);
+        do_stuff(x + 5, y);
+        do_stuff(x + 4, y);
+        do_stuff(x + 3, y);
+
+        do_stuff(x + 3, y + 1);
+        do_stuff(x + 3, y + 2);
+        do_stuff(x + 3, y + 3);
+
+        do_stuff(x + 3, y + 5);
+        do_stuff(x + 3, y + 6);
+        do_stuff(x + 3, y + 7);
+
+        do_stuff(x + 2, y + 7);
+        do_stuff(x + 1, y + 7);
+        do_stuff(x, y + 7);
     }
-#endif
+
     //for local only
     CL_Vec2f GetPos() {
         //returning the encrypted one cuz its 100% what the server has
@@ -129,8 +181,8 @@ GTClass NetAvatar { //how fucking annoying it is to get align to work
     void SetSize(float x, float y) {
         size.x = x;
         size.y = y;
-        size_enc.x = x / 6.5999999;
-        size_enc.y = y / 1.3;
+        size_enc.x = x / 6.5999999f;
+        size_enc.y = y / 1.3f;
     }
 
     CL_Vec2f GetSize() {
@@ -138,19 +190,13 @@ GTClass NetAvatar { //how fucking annoying it is to get align to work
     }
 
     void SetModStatus(bool mod, bool supermod) {
-        *(bool*)(uintptr_t(this) + 377) = mod;
-        *(bool*)(uintptr_t(this) + 378) = supermod;
-
-        //for now OnDataConfig for some reason sets 378th bit as true even though if its not, idk why
-        /*  static std::vector<const char*> ondataconfig_patt{ "C7 43 ?? 05 00 00 00 C7 43 ?? 00", "40 0F ?? ?? 83", "0F 95 C0 40" };
-        static auto OnDataConfig = types::OnDataConfig(utils::find_func_has(ondataconfig_patt, 250));
-        
-        printf("dataconfig (EXACT): %llx\n", (uintptr_t)OnDataConfig);*/
-        /* variantlist_t va{};
-        va[0] = uint32_t(mod);
-        va[1] = uint32_t(supermod);
-
-        OnDataConfig(this, &va);*/
+        is_mod = mod;
+        is_supermod = supermod;
+    }
+    void SetCharacterMods(bool dash, bool charge, bool cancel) {
+    
+        uint8_t _flags = (dash << 1) | (charge << 0) | (cancel << 2);
+        gt::set_extra_character_mods(this, _flags);
     }
 };
 #pragma pack(pop)

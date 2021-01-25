@@ -32,9 +32,9 @@ void menu::framework_tab() {
 
         static float xpos = 0.f, ypos = 0.f;
         ImGui::PushItemWidth(100.f);
-        ImGui::InputFloat("X", &xpos, 10.f, 10.f, 0.f);
+        ImGui::InputFloat("X", &xpos, 10.f, 10.f, 0);
         ImGui::SameLine();
-        ImGui::InputFloat("Y", &ypos, 10.f, 10.f, 0.f);
+        ImGui::InputFloat("Y", &ypos, 10.f, 10.f, 0);
         ImGui::PopItemWidth();
         if (ImGui::Button("Teleport"))
             local->SetPos(xpos, ypos);
@@ -157,7 +157,7 @@ void menu::framework_tab() {
         ImGui::Separator();
         ImGui::PushItemWidth(150.0f);
         ImGui::InputInt("track_tick", &client->tracking_tick);
-        ImGui::InputInt("conn_status", &client->conn_status);
+        ImGui::InputInt("net_msg_type", &client->net_msg_type);
         ImGui::InputInt("unk_timer", &client->another_timer);
         ImGui::InputInt("conn_timer", &client->connection_timer);
         ImGui::PopItemWidth();

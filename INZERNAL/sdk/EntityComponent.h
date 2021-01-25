@@ -1,7 +1,4 @@
 #pragma once
-#include <core/utils.h>
-
-#include <sdk/world/Tile.h>
 
 #pragma pack(push, 1)
 GTClass EntityComponent {

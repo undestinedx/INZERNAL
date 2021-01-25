@@ -37,7 +37,8 @@ void consts::set_defaults() {
 }
 
 void consts::set_float(int index, float val) {
-    static auto offset = ((uintptr_t)global::gt + consts_offset);
+    static auto offset = sigs::get(sig::consts_offset);
+    static auto counter_offset = utils::read<uint32_t>(sigs::get(sig::counter_offset), 0);
     auto ptr = (EncryptedFloat*)(offset + index * sizeof(EncryptedFloat));
     float delta = val - ptr->get();
     ptr->set(val);
@@ -46,7 +47,7 @@ void consts::set_float(int index, float val) {
 }
 
 float consts::get_float(int index) {
-    static auto offset = ((uintptr_t)global::gt + consts_offset);
+    static auto offset = sigs::get(sig::consts_offset);
     auto ptr = (EncryptedFloat*)(offset + index * sizeof(EncryptedFloat));
     return ptr->get();
 }

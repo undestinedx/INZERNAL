@@ -1,13 +1,14 @@
 #pragma once
+#include <sdk/GameUpdatePacket.h>
 #include <core/globals.h>
 #include <core/miniz/miniz.h>
-#include <proton/RTFileFormat.h>
+
 #include <stdio.h>
 #include <random>
 #include <sstream>
 #include <string>
 #include <core/sigs.hpp>
-#include <sdk/GameUpdatePacket.h>
+
 
 //for our dear memory manipulation
 #define GTClass struct __declspec(align(1)) alignas(1) 
@@ -44,12 +45,12 @@ namespace utils {
         return VirtualProtect(address, size, old, &old);
     }
     template <typename t>
-    t& read(uintptr_t addr, uintptr_t offs) {
+    t& read(uintptr_t addr, intptr_t offs) {
         return *(t*)(addr + offs);
     }
 
     template <typename t = uintptr_t>
-    t find_pattern(const char* pat, bool notify = true, uintptr_t offset = 0) {
+    t find_pattern(const char* pat, bool notify = true, intptr_t offset = 0) {
         static auto pat2byt = [](const char* pat) {
             std::vector<int> bytes{};
             auto start = (char*)pat;
@@ -104,7 +105,9 @@ namespace utils {
     bool replace(std::string& str, const std::string& from, const std::string& to);
     std::string rnd(size_t length);
     float random_float(float a, float b);
+    bool run_at_interval(types::time& timer, double interval, bool sway = false, float swayd = 0.0f);
 
+    std::string get_clipboard();
     //advanced pattern finding functions that I made for sustaining patterns over 10-40 versions / updates
     uintptr_t find_func_start(uintptr_t addr);
     uintptr_t find_func_start(const char* pattern);
@@ -117,7 +120,7 @@ namespace utils {
 
     std::string format(const char* msg, ...);
     void unprotect_process();
-} // namespace utils
+}; // namespace utils
 
 //ported from private internal, code by atipls:
 namespace detail {

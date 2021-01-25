@@ -18,7 +18,18 @@ namespace sig {
         processtankupdatepacket,
         canseeghosts,
         nethttp_update,
-        app_update
+        app_update,
+        tileextra_serialize,
+        onpunched,
+        getfruitbloompercent,
+        dialogisopened,
+        setextracharactermods,
+        getsurfaceanim,
+        mutexbypass1,
+        mutexbypass2,
+        s_renderd3d9,
+        consts_offset,
+        counter_offset
     };
 
     namespace type {
@@ -26,6 +37,7 @@ namespace sig {
             direct, //utils::find_pattern
             fstart, //utils::find_func_start
             call,   //detail::get_call
+            direct_calc
             //leaving out some unused methods (like utils::find_func_end) of getting these for now
         };
     }

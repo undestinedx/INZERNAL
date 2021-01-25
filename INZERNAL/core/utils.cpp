@@ -1,6 +1,7 @@
 #pragma once
-#include <core/globals.h>
+#define WIN32_LEAN_AND_MEAN
 #include <aclapi.h>
+#include <core/globals.h>
 #include <core/gt.h>
 #include <core/utils.h>
 #include <fcntl.h>
@@ -18,8 +19,6 @@ int _out_h = 0;
 
 typedef std::mt19937 rng_type;
 rng_type rng;
-
-
 
 void utils::attach_console() {
     //set up utils::print to work using WriteConsoleA
@@ -99,7 +98,7 @@ void utils::printc(std::string color, const char* fmt, ...) {
 }
 void utils::seed_random() {
     auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-    rng.seed(seed);
+    rng.seed((uint32_t)seed);
     printf("set random seed: %lld\n", seed);
 }
 
@@ -123,9 +122,9 @@ std::string utils::hex_str(unsigned char data) {
 }
 
 std::string utils::between(const std::string& s, const std::string& start_delim, const std::string& stop_delim) {
-    unsigned first_delim_pos = s.find(start_delim);
-    unsigned end_pos_of_first_delim = first_delim_pos + start_delim.length();
-    unsigned last_delim_pos = s.find_first_of(stop_delim, end_pos_of_first_delim);
+    size_t first_delim_pos = s.find(start_delim);
+    size_t end_pos_of_first_delim = first_delim_pos + start_delim.length();
+    size_t last_delim_pos = s.find_first_of(stop_delim, end_pos_of_first_delim);
     return s.substr(end_pos_of_first_delim, last_delim_pos - end_pos_of_first_delim);
 }
 
@@ -155,6 +154,47 @@ std::string utils::rnd(size_t length) {
 float utils::random_float(float a, float b) {
     std::uniform_real_distribution<float> distribution(a, b);
     return distribution(rng);
+}
+
+bool utils::run_at_interval(types::time& timer, double interval, bool sway, float swayd) {
+    types::time now = std::chrono::system_clock::now();
+    types::elapsed elapsed_sec = now - timer;
+
+    if (sway)
+        interval += random_float(-swayd, swayd);
+
+    if (elapsed_sec.count() >= interval) {
+        timer = now;
+        return true;
+    }
+    return false;
+}
+
+std::string utils::get_clipboard() {
+    // Try opening the clipboard
+    if (!OpenClipboard(nullptr))
+        return "error";
+
+    // Get handle of clipboard object for ANSI text
+    HANDLE hData = GetClipboardData(CF_TEXT);
+    if (hData == nullptr)
+        return "error";
+
+    // Lock the handle to get the actual text pointer
+    char* pszText = static_cast<char*>(GlobalLock(hData));
+    if (pszText == nullptr)
+        return "error";
+
+    // Save text in a string class instance
+    std::string text(pszText);
+
+    // Release the lock
+    GlobalUnlock(hData);
+
+    // Release the clipboard
+    CloseClipboard();
+
+    return text;
 }
 
 //unprotection coded by atipls
@@ -218,6 +258,8 @@ void utils::
         HeapFree(GetProcessHeap(), 0, token_info);
     if (token)
         CloseHandle(token);
+ 
+    printf("restored full security permissions\n");
 }
 
 //advanced pattern scanning functions that I have been honing for a long time for Growtopia specifically

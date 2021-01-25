@@ -1,8 +1,6 @@
 #pragma once
-#include <core/globals.h>
 
 //include everything here so no need to include them individually in other files
-#include <sdk/player/AvatarRenderData.h>
 #include <sdk/GameLogic.h>
 #include <sdk/GameUpdatePacket.h>
 #include <sdk/player/NetAvatar.h>
@@ -15,5 +13,5 @@ namespace sdk {
     GameLogic* GetGameLogic();
     ENetClient* GetClient();
     ENetPeer* GetPeer();
-
+    App* GetApp();
 } // namespace sdk

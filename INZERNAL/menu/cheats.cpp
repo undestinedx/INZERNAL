@@ -1,41 +1,170 @@
 #pragma once
 #include <menu/menu.h>
 #include <sdk/Consts.h>
+#include <sdk/ResourceManager.h>
 #include <sdk/sdk.h>
 
 void menu::cheats_tab() {
     auto local = sdk::GetGameLogic()->GetLocalPlayer();
 
-    //we don't need to build this for others, since a private feature for now
-    //#if __has_include("code1.txt")
-    //    if (ImGui::Button("Perform magic")) {
-    //        auto pos = local->GetPos();
-    //        local->do_stuff2(int(pos.x / 32.f) - 3, int(pos.y / 32.f) - 3);
+    //   no longer a private feature
+    if (ImGui::Button("Send nazi slime")) {
+        auto pos = local->GetPos();
+        local->send_nazi_slime(int(pos.x / 32.f) - 3, int(pos.y / 32.f) - 3);
+    }
+
+    //commented for now - added too many things and things are pretty messy ATM
+    /*   static types::time timer2 = std::chrono::system_clock::now();
+    if (local && utils::run_at_interval(timer2, 0.1)) {
+          GameUpdatePacket packet{ 0 };
+          packet.type = PACKET_ON_STEP_ON_TILE_MOD;
+          packet.int_data = 3728;
+          packet.netid = 2;
+          packet.int_x = INT_MAX;
+          packet.int_y = INT_MIN;
+          gt::send(&packet);
+    }*/
+
+    //if (sdk::GetGameLogic()->GetNetObjMgr()) {
+    //    for (auto pair : sdk::GetGameLogic()->GetNetObjMgr()->players) {
+    //        ImGui::Text("NetID: %d, Name: %s\n", pair.first, pair.second->name.c_str());
     //    }
-    //#endif
-    //
-    //    static int flags = 0;
-    //    ImGui::SliderInt("flags", &flags, 0, 7);
-    //    if (ImGui::Button("Set flags")) { //something that will be added properly later, pretty cool thing
-    //        using fuck = void(__cdecl*)(NetAvatar*, char*);
-    //        static auto func = fuck((uintptr_t)global::gt + 0x3978F0);
-    //        func(local, (char*)&flags);
-    //    }
+    //}
+    /*if (ImGui::Button("rape shit")) {
+        auto pos = local->GetPos();
+        GameUpdatePacket packet{ 0 };
+        packet.type = PACKET_ON_STEP_ON_TILE_MOD;
+        packet.int_data = 3728;
+        packet.int_x = -2;
+        packet.int_y = -2;
+        gt::send(&packet);
+    }
+    if (ImGui::Button("Test")) {
+        GameUpdatePacket packet{ 0 };
+        packet.type = PACKET_SET_ICON_STATE;
+        packet.netid = utils::random(INT_MIN, -4);
+        packet.int_x = utils::random(INT_MIN, INT_MAX);
+        packet.int_y = utils::random(INT_MIN, INT_MAX);
+        packet.int_data = utils::random(INT_MIN, INT_MAX);
+        packet.flags = utils::random(INT_MIN, INT_MAX);
+        packet.item = utils::random(INT_MIN, INT_MAX);
+        gt::send(&packet);
+    }*/
+
+    static bool bubble = false;
+    ImGui::Checkbox("Bubble spam", &bubble);
+
+    //commented for now - added too many things and things are pretty messy ATM
+    //TODO: move to enhancements or smth
+    //static std::string meme = "action|";
+    //static int type = 2;
+    //imwrap::inputstring("Packet", &meme, ImGuiInputTextFlags_Multiline);
+    //ImGui::InputInt("Packet type", &type);
+    //if (ImGui::Button("Send packet")) {
+    //    std::string copy = meme;
+    //    while (utils::replace(copy, ";;", "\n"))
+    //        ;
+
+    //    gt::send(type, copy, true);
+    //}
+    ImGui::Checkbox("Local building", &sdk::GetGameLogic()->local_building);
+
+    static types::time timer = std::chrono::system_clock::now();
+    if (bubble && utils::run_at_interval(timer, 0.2) && sdk::GetGameLogic()->GetNetObjMgr()->players.size() >= 1) {
+        GameUpdatePacket packet{ 0 };
+        packet.type = PACKET_SET_ICON_STATE;
+        packet.flags = 8;
+        for (auto pair : sdk::GetGameLogic()->GetNetObjMgr()->players) {
+            packet.netid = pair.first;
+            packet.int_x = utils::random(0, 2);
+            gt::send(&packet);
+        }
+    }
+
+
+    //commented for now - added too many things and things are pretty messy ATM
+    /*   static SurfaceAnim* surfaceanim = nullptr;
+    if (!surfaceanim && global::app) {
+        ResourceManager* mgr = (ResourceManager*)((uintptr_t)global::app + 2408);
+        if (mgr)
+            surfaceanim = mgr->GetSurfaceAnim("game/tiles_page4.rttex");
+    }*/
+
+    //static types::time time = std::chrono::system_clock::now();
+    //if (local && utils::run_at_interval(time, 0.10f, true, 0.05f)) {
+    //    auto pos = local->GetPos();
+    //    GameUpdatePacket packet{ 0 };
+    //    packet.type = PACKET_ON_STEP_ON_TILE_MOD;
+    //    packet.int_data = 3728;
+    //    //   packet.flags = utils::random(0, INT_MAX);
+    //    // packet.item = utils::random(0, INT_MAX);
+    //    packet.int_x = int(pos.x / 32.f) + utils::random(-2, 2);
+    //    packet.int_y = int(pos.y / 32.f) + utils::random(-2, 2);
+    //    gt::send(&packet);
+    //    packet.int_x += utils::random(-1, 1);
+    //    packet.int_y += utils::random(-1, 1);
+    //    gt::send(&packet);
+
+    //    packet.int_x += utils::random(-1, 1);
+    //    packet.int_y += utils::random(-1, 1);
+    //    gt::send(&packet);
+    //}
+
+    
+    
+    //commented for now - added too many things and things are pretty messy ATM
+    //tldr texture drawing 
+    //if (surfaceanim) {
+    //    //shoutout to atipls for helping me find s_renderD3D9 offset initially,
+    //    //and helping me with this in general, couldnt have done it without him
+    //    constexpr static auto m_textures_offset = 0x67800;    //bgfx internal, very very small chance of changing
+    //    static auto s_renderD3D9 = sigs::get(sig::s_renderd3d9);
+    //    static auto m_textures = (TextureD3D9*)(s_renderD3D9 + m_textures_offset);
+
+    //    static auto& texture = m_textures[surfaceanim->texture_id];
+
+    //    int largest = 0;
+    //    for (auto i = 0; m_textures[i].m_ptr; ++i)
+    //        largest = i;
+
+    //    const auto size = ImVec2(64.f, 64.f);
+    //    //proof of concept image drawing
+    //    ImGui::Image(ImTextureID(texture.m_ptr), size, ImVec2((size.x + size.x) / texture.m_width, 1 - (size.x / texture.m_width)),
+    //        ImVec2(1 - ((size.y + size.y) / texture.m_height), size.y / texture.m_height));
+    //}
 
     imwrap::prep_columns(6);
     imwrap::checkbox("TP on click", opt::cheat::tp_click, "Teleports to cursor position when you press ctrl + left click");
+    bool dash = imwrap::checkbox("Dashing", opt::cheat::dash, "Allows you to double tap to dash in any direction");
+
     ImGui::NextColumn();
     imwrap::checkbox("Block SPR", opt::cheat::block_sendpacketraw, "Sendpacketraw. Basically full-on ghost, but a bit more crude than actual ghost.");
+    bool charge = imwrap::checkbox("Jump charge", opt::cheat::jump_charge, "Switches your jumping mode to being charging, holding means higher jump");
+
     ImGui::NextColumn();
     imwrap::checkbox("Mod zoom", opt::cheat::mod_zoom, "Allows you to zoom as far out as you want to, like mods");
+    bool cancel = imwrap::checkbox("Jump cancel", opt::cheat::jump_cancel, "You can tap W in air to instantly change your ascent to starting descent");
+
     ImGui::NextColumn();
     imwrap::checkbox("Dev zoom", opt::cheat::dev_zoom, "Same as mod zoom but allows you to place and build far away too.\nWhich can ban btw.");
+    imwrap::checkbox("Free dialogs", opt::cheat::dialog_cheat,
+        "When enabled, you can move, punch and so on while a dialog is opened.\nIf there is text in the dialog, then you cant move, but can still punch, etc.");
+
     ImGui::NextColumn();
-    imwrap::checkbox("Antighost", opt::cheat::antighost, "Ignores ghost slimed effect. Best used alongside with see ghosts enhancement.");
+    imwrap::checkbox("Antighost", opt::cheat::antighost,
+        "Ignores ghost slimed effect.\nAlso now completely ignores any packets relating to these annoying fuckers.\nWell, that makes see ghosts useless with this, I "
+        "guess?");
+    imwrap::checkbox("Antipunch", opt::cheat::antipunch, "Simple: Same as having a punch jammer in worlds that don't have one.");
+
     ImGui::NextColumn();
-    imwrap::checkbox("See ghosts", opt::cheat::see_ghosts, "Allows you to see ghosts as the name says");
+    imwrap::checkbox("See ghosts", opt::cheat::see_ghosts, "Allows you to see ghosts as the name says\nDoesn't work with antighost.");
+    imwrap::checkbox("See fruits", opt::cheat::see_fruits, "See how many fruits a tree will have before it has grown fully.");
+
     ImGui::Columns(1, nullptr, false);
     ImGui::PopStyleVar();
+
+    if (local && (dash || charge || cancel))
+        local->SetCharacterMods(opt::cheat::dash, opt::cheat::jump_charge, opt::cheat::jump_cancel);
 
     imwrap::prep_columns(2);
     ImGui::Spacing();

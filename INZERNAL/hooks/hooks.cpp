@@ -4,6 +4,7 @@
 #include <hooks/ProcessTankUpdatePacket.h>
 #include <hooks/SendPacket.h>
 #include <hooks/SendPacketRaw.h>
+#include <hooks/Update.h>
 #include <hooks/hooks.h>
 #include <intrin.h>
 #include <menu\menu.h>
@@ -11,51 +12,39 @@
 #include <stdio.h>
 #include <iomanip>
 #include <thread>
-#include <hooks/Update.h>
 
 WNDPROC hooks::wndproc; //special cases which dont follow normal pattern
 LPVOID hooks::endscene;
 
 hookmanager* hookmgr = new hookmanager();
-IDirect3DDevice9* device = nullptr;
 bool canrender = false;
 
 void hooks::init() {
     global::hwnd = FindWindowA(nullptr, "Growtopia");
 
-    const auto base = global::gt;
-    IDirect3D9* pD3D = Direct3DCreate9(D3D_SDK_VERSION);
+    //the dx9 rendering device that GT (bgfx) uses as well, as for 336 thats the offset of m_device in s_renderd3d9
+    auto device = *(IDirect3DDevice9**)(sigs::get(sig::s_renderd3d9) + 336);
+    auto vtable = *reinterpret_cast<void***>(device);
 
-    if (!pD3D)
-        return;
-
-    D3DPRESENT_PARAMETERS d3dpp{ 0 };
-    d3dpp.hDeviceWindow = global::hwnd;
-    d3dpp.SwapEffect = D3DSWAPEFFECT_COPY;
-    d3dpp.Windowed = TRUE;
-    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE; //vsync
-    d3dpp.FullScreen_RefreshRateInHz = 0;
-    if (FAILED(pD3D->CreateDevice(0, D3DDEVTYPE_HAL, d3dpp.hDeviceWindow, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &device))) {
-        printf("fail: creating device\n");
-        pD3D->Release();
-        return;
-    }
-
-    auto vtable = *reinterpret_cast<void***>(device); 
     MH_CreateHook(LPVOID(vtable[42]), EndScene, (void**)(&hooks::endscene));
-    
+
     //hooks can now be found in sigs.cpp, they are directly set up there
-    for (auto hk : hookmgr->hooks) 
+    for (auto hk : hookmgr->hooks)
         MH_CreateHook(hk->address, hk->hooked, &hk->orig);
-    
+
     wndproc = WNDPROC(SetWindowLongPtrW(global::hwnd, -4, LONG_PTR(WndProc)));
 
     MH_EnableHook(MH_ALL_HOOKS);
     utils::printc("93", "Hooks have been setup!");
 }
 
-void hooks::destroy() {    
-    UpdateManager::OnDestroy(); 
+void hooks::destroy() {
+    UpdateManager::OnDestroy();
+
+    //I mean, I can't be bothered to deal with this, so let's just restore this sig in case we re-inject
+    //it does not matter anyways cuz this is in App::Init and won't be called again.
+    auto mutex2 = sigs::get(sig::mutexbypass2);
+    utils::patch_bytes<6>(mutex2, "\xB9\x01\x00\x1F\x00\xFF");
     SetWindowLongPtr(global::hwnd, -4, LONG_PTR(wndproc));
 RETRY:
     if (MH_OK != MH_DisableHook(MH_ALL_HOOKS)) {
@@ -112,8 +101,18 @@ LRESULT __stdcall hooks::WndProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lpara
     if (msg == WM_KEYDOWN && (wparam == VK_CONTROL || wparam == VK_LCONTROL || wparam == VK_RCONTROL))
         return true;
 
-    if (msg == WM_KEYUP && wparam == VK_F3)
+    if (msg == WM_KEYUP && wparam == VK_F3) //TODO: customization to these keybinds
         global::unload = true;
+
+    if (msg == WM_KEYUP && wparam == VK_F7) { //Convenient way for me when checking accs, to go to their worlds from cli
+        auto cboard = utils::get_clipboard();
+        if (cboard.find("error") != -1)
+            printf("Couldn't get clipboard data.\n");
+        else {
+            std::string packet = "action|join_request\nname|" + cboard + "\ninvitedWorld|0";
+            gt::send(NET_MESSAGE_GAME_MESSAGE, packet, false);
+        }
+    }
 
     return CallWindowProcW(hooks::wndproc, wnd, msg, wparam, lparam);
 }
@@ -125,8 +124,21 @@ void __cdecl hooks::SendPacketRaw(int type, GameUpdatePacket* packet, int size, 
 void __cdecl hooks::HandleTouch(LevelTouchComponent* touch, CL_Vec2f pos, bool started) {
     static auto orig = decltype(&hooks::HandleTouch)(hookmgr->orig(sig::handletouch));
 
-    //TODO: WorldCamera::WorldToScreen to check if pos is within imgui menu when global::draw 
+    //TODO: WorldCamera::WorldToScreen to check if pos is within imgui menu when global::draw
 
+    auto rend = sdk::GetGameLogic()->renderer;
+    if (rend && global::draw && active) {
+     //   auto screen = rend->GetCamera()->WorldToScreen(pos);
+        auto screen = rend->GetCamera()->WorldToScreen(pos);
+   //     auto pos = ImGui::GetWindowPos();
+     //   auto size = ImGui::GetWindowSize();
+        //imgui cant call these during this time so just save them somewhere when not lazy
+
+       /* if (screen.x >= pos.x && screen.x <= (pos.x + size.x) && screen.y >= pos.y && screen.y <= (pos.y + size.y)) {
+            printf("good for us?\n");
+        }*/
+          //  return;
+    }
     if (opt::cheat::tp_click && GetAsyncKeyState(VK_CONTROL)) {
         //localplayer is guaranteed to be a valid pointer here according to xrefs
         auto local = sdk::GetGameLogic()->GetLocalPlayer();
@@ -184,4 +196,43 @@ long __stdcall hooks::EndScene(IDirect3DDevice9* device) {
 //ideal hook for all kinds of continuous loops and also conveniently gets us app
 void __cdecl hooks::App_Update(App* app) {
     UpdateManager::Execute(app);
+}
+
+void __cdecl hooks::TileExtra_Serialize(TileExtra* te, uint8_t* mem, uint32_t* pos, bool save1, World* world, bool save2, Tile* target) {
+    static auto orig = decltype(&hooks::TileExtra_Serialize)(hookmgr->orig(sig::tileextra_serialize));
+    orig(te, mem, pos, save1, world, save2, target);
+    if (te->type == 3 && target->tile_extra) {
+        printf("\n\n[Tile access list]\nID: %d\n", target->foreground);
+
+        utils::printc("96", "Owner: %d", target->tile_extra->owner);
+        for (auto id : target->tile_extra->access_list)
+            utils::printc("92", "\t%d", id);
+
+        printf("\n");
+    }
+}
+
+void __cdecl hooks::OnPunched(NetAvatar* local, CL_Vec2f pos, NetAvatar* puncher) {
+    static auto orig = decltype(&hooks::OnPunched)(hookmgr->orig(sig::onpunched));
+
+    if (!opt::cheat::antipunch)
+        orig(local, pos, puncher);
+}
+
+float __cdecl hooks::GetFruitBloomProgressPercent(Tile* tile) {
+    static auto orig = decltype(&hooks::GetFruitBloomProgressPercent)(hookmgr->orig(sig::getfruitbloompercent));
+
+    if (opt::cheat::see_fruits)
+        return 1.0f; //more than 1.0 is possible and makes trees bigger than normal, ig you can add it if you are interested
+    else
+        return orig(tile);
+}
+
+bool __cdecl hooks::DialogIsOpened(GameLogic* logic) {
+    static auto orig = decltype(&hooks::DialogIsOpened)(hookmgr->orig(sig::dialogisopened));
+
+    if (opt::cheat::dialog_cheat)
+        return false;
+    else
+        return orig(logic);
 }

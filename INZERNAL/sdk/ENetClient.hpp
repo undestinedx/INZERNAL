@@ -10,7 +10,7 @@ GTClass ENetClient {
     ENetPeer* peer;
     int connection_timer;
     int tracking_tick;
-    int conn_status;
+    int net_msg_type;
     int another_timer;
     std::string address;
     int port;
@@ -18,5 +18,4 @@ GTClass ENetClient {
     int token;
     int user; //this is also your userid
 };
-
 #pragma pack(pop)

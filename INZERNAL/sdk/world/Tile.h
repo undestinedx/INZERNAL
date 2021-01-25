@@ -2,6 +2,8 @@
 #include <proton/variant2.hpp>
 #include <core/utils.h>
 
+struct TileExtra;
+
 #pragma pack(push, 1)
 GTClass Tile{
    public:
@@ -16,7 +18,7 @@ GTClass Tile{
     short texture_pos_bg;
     char pad0[6];
     rect_t collision_rect; //see: Tile::BuildCache and Tile::DoesWorldRectCollide
-    void* tile_extra;
+    TileExtra* tile_extra;
     char health_or_damage;
     __int16 unk6;
     int last_tick_punched;
@@ -69,3 +71,63 @@ GTClass Tile{
 //extremely important because we have raw std::vector in tilemap for tiles.
 static_assert(sizeof(Tile) == 144, "wrong tile size!");
 constexpr auto tilelen = sizeof(Tile);
+
+#pragma pack(push, 1)
+GTClass tamagochi_t {
+    uint32_t food;
+    uint32_t water;
+    uint32_t unk0;
+    uint32_t sick;
+};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+GTClass TileExtra {
+   public:
+    void* vftable;
+    uint8_t type;
+    uint8_t some_flag;
+    uint8_t pad0[2];
+    int32_t owner; //for heart monitor, lock etc
+    std::string unk1;
+    std::string label;
+    std::string unk3;
+    uint32_t last_updated;
+    uint32_t growth;     //gets incremented every second for trees, silkworms etc
+    uint8_t fruit_count; //1 for heart monitor, 2 for door, fruit_count for seeds
+    char pad1[3];
+    uint32_t unk5;    //definitely some time too
+    uint8_t alt_type; //has values like 128, 256 but in the windows bin it also gets set to 0 for TeamEntrance1, 1 for TeamEntrance2 etc
+    char pad2[23];
+    std::vector<uint32_t> access_list;
+    void* avatar_data;
+    char unk7a[8];
+    tamagochi_t* tamagochi; //silkworm shit
+    char unk7b[16];
+    std::vector<void* /*CommandData::CommandData -> mac bin*/> command_data;
+    uint32_t unk8;
+    uint32_t unk9;
+    uint32_t unk10;
+    uint32_t unk11;
+    uint32_t unk12;
+    uint32_t unk13;
+    uint32_t unk14;
+    uint32_t unk15;
+    uint32_t unk16;
+    uint32_t unk17;
+    uint32_t unk18;
+    uint32_t unk19;
+    uint32_t unk20;
+    uint32_t unk21;
+    uint32_t unk22;
+    uint32_t unk23;
+    uint32_t unk24;
+    uint32_t unk25;
+    uint32_t unk26;
+    uint32_t unk27;
+    uint32_t unk28;
+    uint32_t unk29;
+    uint32_t unk30;
+    uint32_t unk31;
+};
+#pragma pack(pop)
