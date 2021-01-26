@@ -27,12 +27,12 @@ namespace opt {
 
 	bool		spoof_login	= true;		//whether or not to spoof mac, hash2, wk, rid, etc on login. GT version spoofed even when off.
 	bool		spoof_name	= true;		//Also set the requestedName field to random. Might be unwanted for non grow-id accounts.
-	WinSpoof	spoof_win	= ::wsMimic;	//Mode of zf/fz spoofing mode. See the WinSpoof enum for more details.
+	WinSpoof	spoof_win	= ::wsRandom;	//Mode of zf/fz spoofing mode. See the WinSpoof enum for more details.
 	FlagMode	flag_mode	= ::fmRandom; //See FlagMode enum for details.
 	std::string	flag		= "us";		//set if flag_mode is set to fmCustom
 
-	bool		custom_server_on	= false;	//when on it uses 
-	std::string	custom_server_val	= "127.0.0.1"; //localhost works with proxy. custom servers and growtopia2/1 work too.
+	bool		custom_server_on	= true;	//when on it uses 
+	std::string	custom_server_val	= "growtopia2.com"; //localhost works with proxy. custom servers and growtopia2/1 work too.
 
 	//cheats
 	namespace cheat {	

@@ -73,7 +73,7 @@ bool menu::WndProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam) {
         init = true;
     }
 
-    if (msg == WM_KEYUP && wparam == VK_F2)
+    if (msg == WM_KEYUP && wparam == VK_INSERT)
         global::draw = !global::draw;
 
     /*  if (msg == WM_KEYUP && wparam == VK_F4)

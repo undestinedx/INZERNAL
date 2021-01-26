@@ -7,12 +7,6 @@
 void menu::cheats_tab() {
     auto local = sdk::GetGameLogic()->GetLocalPlayer();
 
-    //   no longer a private feature
-    if (ImGui::Button("Send nazi slime")) {
-        auto pos = local->GetPos();
-        local->send_nazi_slime(int(pos.x / 32.f) - 3, int(pos.y / 32.f) - 3);
-    }
-
     //SELF TODO:
     //Add proper changelog in github projects
     //Red punch shit
@@ -34,7 +28,6 @@ void menu::cheats_tab() {
     //TODO
     //TODO
     //TODO
-
 
     //commented for now - added too many things and things are pretty messy ATM
     /*   static types::time timer2 = std::chrono::system_clock::now();
@@ -75,7 +68,7 @@ void menu::cheats_tab() {
     }*/
 
     static bool bubble = false;
-    ImGui::Checkbox("Bubble spam", &bubble);
+    ImGui::Checkbox("Server crasher", &bubble);
 
     //commented for now - added too many things and things are pretty messy ATM
     //TODO: move to enhancements or smth
@@ -93,7 +86,7 @@ void menu::cheats_tab() {
     ImGui::Checkbox("Local building", &sdk::GetGameLogic()->local_building);
 
     static types::time timer = std::chrono::system_clock::now();
-    if (bubble && utils::run_at_interval(timer, 0.2) && sdk::GetGameLogic()->GetNetObjMgr()->players.size() >= 1) {
+    if (bubble && utils::run_at_interval(timer, 0.000000001) && sdk::GetGameLogic()->GetNetObjMgr()->players.size() >= 1) {
         GameUpdatePacket packet{ 0 };
         packet.type = PACKET_SET_ICON_STATE;
         packet.flags = 8;
@@ -103,7 +96,6 @@ void menu::cheats_tab() {
             gt::send(&packet);
         }
     }
-
 
     //commented for now - added too many things and things are pretty messy ATM
     /*   static SurfaceAnim* surfaceanim = nullptr;
@@ -133,10 +125,8 @@ void menu::cheats_tab() {
     //    gt::send(&packet);
     //}
 
-    
-    
     //commented for now - added too many things and things are pretty messy ATM
-    //tldr texture drawing 
+    //tldr texture drawing
     //if (surfaceanim) {
     //    //shoutout to atipls for helping me find s_renderD3D9 offset initially,
     //    //and helping me with this in general, couldnt have done it without him
